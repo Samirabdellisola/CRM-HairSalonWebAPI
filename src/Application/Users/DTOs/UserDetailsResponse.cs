@@ -1,0 +1,18 @@
+using SalonCRM.Domain.Enums;
+
+namespace SalonCRM.Application.Users.DTOs;
+
+public class UserDetailsResponse
+{
+    public Guid Id { get; set; }
+
+    public string Email { get; set; } = string.Empty;
+
+    public UserRole Role { get; set; }
+
+    public string? Phone { get; set; }
+
+    public string? Address { get; set; }
+
+    public Guid? BranchId { get; set; }
+}

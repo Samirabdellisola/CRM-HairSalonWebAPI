@@ -5,6 +5,7 @@ namespace SalonCRM.Api.Configurations;
 public static class SwaggerConfig
 {
     public const string EnabledInProductionKey = "Swagger:EnabledInProduction";
+    private const string BearerSecurityScheme = "Bearer";
 
     public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
     {
@@ -17,6 +18,39 @@ public static class SwaggerConfig
                 Version = "v1",
                 Description = "Cloud-based Salon CRM backend API"
             });
+
+            // Lets Swagger UI send "Authorization: Bearer {token}" for protected endpoints.
+            options.AddSecurityDefinition(BearerSecurityScheme, new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = BearerSecurityScheme,
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter the access token obtained from /auth/login or /auth/refresh-token."
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = BearerSecurityScheme
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                options.IncludeXmlComments(xmlPath);
+            }
         });
 
         return services;

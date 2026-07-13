@@ -2,15 +2,25 @@ using SalonCRM.Domain.Common;
 
 namespace SalonCRM.Domain.Entities;
 
+/// <summary>
+/// A salon branch/location. Each branch may have one BranchAdmin user assigned to it.
+/// </summary>
 public class Branch : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
 
-    public string? Address { get; set; }
-
-    public string? Phone { get; set; }
-
     public bool IsActive { get; set; } = true;
 
-    public ICollection<Staff> StaffMembers { get; set; } = new List<Staff>();
+    /// <summary>
+    /// Indicates the branch is frozen (e.g. contract ended or temporarily suspended).
+    /// Schema only for now; no endpoint enforces this yet.
+    /// </summary>
+    public bool IsFrozen { get; set; }
+
+    /// <summary>
+    /// The BranchAdmin user assigned to manage this branch.
+    /// </summary>
+    public Guid? AdminId { get; set; }
+
+    public User? AdminUser { get; set; }
 }

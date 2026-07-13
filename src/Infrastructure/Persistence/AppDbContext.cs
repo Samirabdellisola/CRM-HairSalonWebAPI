@@ -10,26 +10,32 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<Customer> Customers => Set<Customer>();
-    public DbSet<Staff> StaffMembers => Set<Staff>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Branch> Branches => Set<Branch>();
-    public DbSet<Service> Services => Set<Service>();
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<Payment> Payments => Set<Payment>();
-    public DbSet<Expense> Expenses => Set<Expense>();
-    public DbSet<Report> Reports => Set<Report>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Customer>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
-            entity.ToTable("customers");
+            entity.ToTable("users");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Email).HasMaxLength(256);
+            entity.Property(e => e.Email).HasMaxLength(256).IsRequired();
+            entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.PasswordHash).HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Role)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .IsRequired();
             entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.HasOne(e => e.Branch)
+                .WithMany()
+                .HasForeignKey(e => e.BranchId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Branch>(entity =>
@@ -37,94 +43,39 @@ public class AppDbContext : DbContext
             entity.ToTable("branches");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Address).HasMaxLength(500);
-            entity.Property(e => e.Phone).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<Staff>(entity =>
-        {
-            entity.ToTable("staff");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Email).HasMaxLength(256);
-            entity.Property(e => e.Phone).HasMaxLength(50);
-            entity.Property(e => e.Role).HasMaxLength(100);
-            entity.HasOne(e => e.Branch)
-                .WithMany(b => b.StaffMembers)
-                .HasForeignKey(e => e.BranchId)
+            entity.HasIndex(e => e.Name).IsUnique();
+            entity.HasOne(e => e.AdminUser)
+                .WithMany()
+                .HasForeignKey(e => e.AdminId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<Service>(entity =>
+        modelBuilder.Entity<RefreshToken>(entity =>
         {
-            entity.ToTable("services");
+            entity.ToTable("refresh_tokens");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.Price).HasPrecision(18, 2);
-        });
-
-        modelBuilder.Entity<Order>(entity =>
-        {
-            entity.ToTable("orders");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
-            entity.Property(e => e.Notes).HasMaxLength(1000);
-            entity.HasOne(e => e.Customer)
-                .WithMany()
-                .HasForeignKey(e => e.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(e => e.Staff)
-                .WithMany()
-                .HasForeignKey(e => e.StaffId)
-                .OnDelete(DeleteBehavior.SetNull);
-            entity.HasOne(e => e.Branch)
-                .WithMany()
-                .HasForeignKey(e => e.BranchId)
-                .OnDelete(DeleteBehavior.SetNull);
-            entity.HasOne(e => e.Service)
-                .WithMany()
-                .HasForeignKey(e => e.ServiceId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<Payment>(entity =>
-        {
-            entity.ToTable("payments");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Amount).HasPrecision(18, 2);
-            entity.Property(e => e.Method).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
-            entity.HasOne(e => e.Order)
-                .WithMany(o => o.Payments)
-                .HasForeignKey(e => e.OrderId)
+            entity.Property(e => e.Token).HasMaxLength(500).IsRequired();
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.Ignore(e => e.IsActive);
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(e => e.UserId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<Expense>(entity =>
+        modelBuilder.Entity<PasswordResetToken>(entity =>
         {
-            entity.ToTable("expenses");
+            entity.ToTable("password_reset_tokens");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Description).HasMaxLength(500).IsRequired();
-            entity.Property(e => e.Amount).HasPrecision(18, 2);
-            entity.Property(e => e.Category).HasMaxLength(100);
-            entity.HasOne(e => e.Branch)
-                .WithMany()
-                .HasForeignKey(e => e.BranchId)
-                .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<Report>(entity =>
-        {
-            entity.ToTable("reports");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.ReportType).HasMaxLength(100).IsRequired();
-            entity.HasOne(e => e.Branch)
-                .WithMany()
-                .HasForeignKey(e => e.BranchId)
-                .OnDelete(DeleteBehavior.SetNull);
+            entity.Property(e => e.Token).HasMaxLength(500).IsRequired();
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.Ignore(e => e.IsValid);
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.PasswordResetTokens)
+                .HasForeignKey(e => e.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
