@@ -1,0 +1,41 @@
+## .NET
+bin/
+obj/
+out/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Visual Studio
+.vs/
+*.rsuser
+*.dbmdl
+*.jfm
+*.pfx
+*.publishsettings
+
+## Build / publish
+*.dll
+*.exe
+*.pdb
+*.cache
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## IDE / tools
+*.swp
+*~
+.idea/
+*.DotSettings.user
