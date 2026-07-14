@@ -6,6 +6,7 @@ using SalonCRM.Application.Auth;
 using SalonCRM.Application.Auth.Executors;
 using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Branches.Executors;
+using SalonCRM.Application.Staff.Executors;
 using SalonCRM.Application.Users.Executors;
 using SalonCRM.Domain.Entities;
 using SalonCRM.Infrastructure.Persistence;
@@ -13,6 +14,7 @@ using SalonCRM.Infrastructure.Services;
 using SalonCRM.Infrastructure.Services.Auth.Executors;
 using SalonCRM.Infrastructure.Services.Branches.Executors;
 using SalonCRM.Infrastructure.Services.Common;
+using SalonCRM.Infrastructure.Services.Staff.Executors;
 using SalonCRM.Infrastructure.Services.Users.Executors;
 
 namespace SalonCRM.Infrastructure;
@@ -63,6 +65,14 @@ public static class DependencyInjection
         services.AddScoped<IActivateBranchExecutor, ActivateBranchExecutor>();
         services.AddScoped<IFreezeBranchExecutor, FreezeBranchExecutor>();
         services.AddScoped<IAssignBranchAdminExecutor, AssignBranchAdminExecutor>();
+
+        services.AddScoped<IGetStaffListExecutor, GetStaffListExecutor>();
+        services.AddScoped<IGetStaffByIdExecutor, GetStaffByIdExecutor>();
+        services.AddScoped<IGetBranchStaffExecutor, GetBranchStaffExecutor>();
+        services.AddScoped<IUpdateStaffExecutor, UpdateStaffExecutor>();
+        services.AddScoped<IActivateStaffExecutor, ActivateStaffExecutor>();
+        services.AddScoped<IDeactivateStaffExecutor, DeactivateStaffExecutor>();
+        services.AddScoped<IFreezeStaffExecutor, FreezeStaffExecutor>();
 
         // Repository implementations will be registered here as the CRM grows.
 

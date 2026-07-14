@@ -17,6 +17,11 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
 
     /// <summary>
+    /// Indicates the staff account is frozen (e.g. contract ended).
+    /// </summary>
+    public bool IsFrozen { get; set; }
+
+    /// <summary>
     /// Optional contact phone number. Not required.
     /// </summary>
     public string? Phone { get; set; }

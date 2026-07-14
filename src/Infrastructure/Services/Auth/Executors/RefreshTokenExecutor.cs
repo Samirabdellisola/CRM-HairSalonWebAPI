@@ -34,7 +34,8 @@ public class RefreshTokenExecutor : AuthExecutorBase, IRefreshTokenExecutor
             || existingToken.RevokedAt is not null
             || existingToken.ExpiresAt <= utcNow
             || existingToken.User is null
-            || !existingToken.User.IsActive)
+            || !existingToken.User.IsActive
+            || existingToken.User.IsFrozen)
         {
             throw new AppException("Invalid or expired refresh token.", AppErrorType.Unauthorized);
         }

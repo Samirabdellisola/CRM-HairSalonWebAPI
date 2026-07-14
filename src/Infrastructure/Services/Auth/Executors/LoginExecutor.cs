@@ -27,7 +27,7 @@ public class LoginExecutor : AuthExecutorBase, ILoginExecutor
         var email = NormalizeEmail(request.Email);
         var user = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
-        if (user is null || !user.IsActive)
+        if (user is null || !user.IsActive || user.IsFrozen)
         {
             throw new AppException("Invalid email or password.", AppErrorType.Unauthorized);
         }
