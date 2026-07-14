@@ -44,6 +44,8 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.HasIndex(e => e.Name).IsUnique();
+            entity.Property(e => e.Address).HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Phone).HasMaxLength(50).IsRequired();
             entity.HasOne(e => e.AdminUser)
                 .WithMany()
                 .HasForeignKey(e => e.AdminId)

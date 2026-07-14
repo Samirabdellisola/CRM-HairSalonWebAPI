@@ -31,6 +31,13 @@ public class UpdateUserRoleExecutor : IUpdateUserRoleExecutor
             throw new AppException("A user's role cannot be changed to CentralOffice.", AppErrorType.Validation);
         }
 
+        if (request.NewRole == UserRole.BranchAdmin)
+        {
+            throw new AppException(
+                "BranchAdmin can only be assigned via creating a branch or assign-admin.",
+                AppErrorType.Validation);
+        }
+
         var targetUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == targetUserId, cancellationToken);
         if (targetUser is null)
         {

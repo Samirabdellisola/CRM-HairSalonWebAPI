@@ -5,11 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using SalonCRM.Application.Auth;
 using SalonCRM.Application.Auth.Executors;
 using SalonCRM.Application.Auth.Options;
+using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Users.Executors;
 using SalonCRM.Domain.Entities;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services;
 using SalonCRM.Infrastructure.Services.Auth.Executors;
+using SalonCRM.Infrastructure.Services.Branches.Executors;
 using SalonCRM.Infrastructure.Services.Common;
 using SalonCRM.Infrastructure.Services.Users.Executors;
 
@@ -52,6 +54,15 @@ public static class DependencyInjection
         services.AddScoped<IUpdateUserExecutor, UpdateUserExecutor>();
         services.AddScoped<IUpdateUserRoleExecutor, UpdateUserRoleExecutor>();
         services.AddScoped<IDeleteUserExecutor, DeleteUserExecutor>();
+
+        services.AddScoped<ICreateBranchExecutor, CreateBranchExecutor>();
+        services.AddScoped<IGetBranchesExecutor, GetBranchesExecutor>();
+        services.AddScoped<IGetBranchByIdExecutor, GetBranchByIdExecutor>();
+        services.AddScoped<IUpdateBranchExecutor, UpdateBranchExecutor>();
+        services.AddScoped<IDeactivateBranchExecutor, DeactivateBranchExecutor>();
+        services.AddScoped<IActivateBranchExecutor, ActivateBranchExecutor>();
+        services.AddScoped<IFreezeBranchExecutor, FreezeBranchExecutor>();
+        services.AddScoped<IAssignBranchAdminExecutor, AssignBranchAdminExecutor>();
 
         // Repository implementations will be registered here as the CRM grows.
 

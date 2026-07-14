@@ -9,11 +9,14 @@ public class Branch : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
 
+    public string Address { get; set; } = string.Empty;
+
+    public string Phone { get; set; } = string.Empty;
+
     public bool IsActive { get; set; } = true;
 
     /// <summary>
     /// Indicates the branch is frozen (e.g. contract ended or temporarily suspended).
-    /// Schema only for now; no endpoint enforces this yet.
     /// </summary>
     public bool IsFrozen { get; set; }
 
