@@ -13,5 +13,10 @@ public class CreateOrderRequest
     [MaxLength(2000)]
     public string? Comment { get; set; }
 
+    /// <summary>
+    /// Business date of the order. Defaults to UTC now when omitted.
+    /// </summary>
+    public DateTime? Date { get; set; }
+
     public List<Guid>? ServiceIds { get; set; }
 }

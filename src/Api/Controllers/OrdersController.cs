@@ -4,6 +4,8 @@ using SalonCRM.Application.Common.DTOs;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Orders.DTOs;
 using SalonCRM.Application.Orders.Executors;
+using SalonCRM.Application.Payments.DTOs;
+using SalonCRM.Application.Payments.Executors;
 
 namespace SalonCRM.Api.Controllers;
 
@@ -25,6 +27,7 @@ public class OrdersController : ApiControllerBase
     private readonly ICompleteOrderExecutor _completeOrderExecutor;
     private readonly ICancelOrderExecutor _cancelOrderExecutor;
     private readonly IGetPendingPaymentOrdersExecutor _getPendingPaymentOrdersExecutor;
+    private readonly IGetOrderPaymentsExecutor _getOrderPaymentsExecutor;
 
     public OrdersController(
         IGetOrdersExecutor getOrdersExecutor,
@@ -35,7 +38,8 @@ public class OrdersController : ApiControllerBase
         IRemoveOrderServiceExecutor removeOrderServiceExecutor,
         ICompleteOrderExecutor completeOrderExecutor,
         ICancelOrderExecutor cancelOrderExecutor,
-        IGetPendingPaymentOrdersExecutor getPendingPaymentOrdersExecutor)
+        IGetPendingPaymentOrdersExecutor getPendingPaymentOrdersExecutor,
+        IGetOrderPaymentsExecutor getOrderPaymentsExecutor)
     {
         _getOrdersExecutor = getOrdersExecutor;
         _getOrderByIdExecutor = getOrderByIdExecutor;
@@ -46,6 +50,7 @@ public class OrdersController : ApiControllerBase
         _completeOrderExecutor = completeOrderExecutor;
         _cancelOrderExecutor = cancelOrderExecutor;
         _getPendingPaymentOrdersExecutor = getPendingPaymentOrdersExecutor;
+        _getOrderPaymentsExecutor = getOrderPaymentsExecutor;
     }
 
     /// <summary>
@@ -94,6 +99,24 @@ public class OrdersController : ApiControllerBase
         try
         {
             var response = await _getOrderByIdExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>Lists payments for an order. Same visibility as viewing the order.</summary>
+    [HttpGet("{orderId:guid}/payments")]
+    [ProducesResponseType(typeof(IReadOnlyList<PaymentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetOrderPayments(Guid orderId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getOrderPaymentsExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), orderId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

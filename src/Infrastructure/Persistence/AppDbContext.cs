@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Service> Services => Set<Service>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -139,6 +140,10 @@ public class AppDbContext : DbContext
                 .HasForeignKey(e => e.BranchId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Payment)
+                .WithMany()
+                .HasForeignKey(e => e.PaymentId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -156,6 +161,37 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Service)
                 .WithMany()
                 .HasForeignKey(e => e.ServiceId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.ToTable("payments");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(100).IsRequired();
+            entity.HasIndex(e => e.BranchId);
+            entity.HasIndex(e => e.CustomerId);
+            entity.HasIndex(e => e.StaffId);
+            entity.HasIndex(e => e.OrderId).IsUnique();
+            entity.HasOne(e => e.Customer)
+                .WithMany()
+                .HasForeignKey(e => e.CustomerId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Staff)
+                .WithMany()
+                .HasForeignKey(e => e.StaffId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Branch)
+                .WithMany()
+                .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Order)
+                .WithMany()
+                .HasForeignKey(e => e.OrderId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         });

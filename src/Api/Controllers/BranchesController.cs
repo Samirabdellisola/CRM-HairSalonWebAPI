@@ -8,6 +8,8 @@ using SalonCRM.Application.Customers.DTOs;
 using SalonCRM.Application.Customers.Executors;
 using SalonCRM.Application.Orders.DTOs;
 using SalonCRM.Application.Orders.Executors;
+using SalonCRM.Application.Payments.DTOs;
+using SalonCRM.Application.Payments.Executors;
 using SalonCRM.Application.Staff.DTOs;
 using SalonCRM.Application.Staff.Executors;
 
@@ -35,6 +37,7 @@ public class BranchesController : ApiControllerBase
     private readonly IGetBranchCustomersExecutor _getBranchCustomersExecutor;
     private readonly IGetBranchOrdersExecutor _getBranchOrdersExecutor;
     private readonly IGetBranchPendingPaymentOrdersExecutor _getBranchPendingPaymentOrdersExecutor;
+    private readonly IGetBranchPaymentsExecutor _getBranchPaymentsExecutor;
 
     public BranchesController(
         IGetBranchesExecutor getBranchesExecutor,
@@ -48,7 +51,8 @@ public class BranchesController : ApiControllerBase
         IGetBranchStaffExecutor getBranchStaffExecutor,
         IGetBranchCustomersExecutor getBranchCustomersExecutor,
         IGetBranchOrdersExecutor getBranchOrdersExecutor,
-        IGetBranchPendingPaymentOrdersExecutor getBranchPendingPaymentOrdersExecutor)
+        IGetBranchPendingPaymentOrdersExecutor getBranchPendingPaymentOrdersExecutor,
+        IGetBranchPaymentsExecutor getBranchPaymentsExecutor)
     {
         _getBranchesExecutor = getBranchesExecutor;
         _getBranchByIdExecutor = getBranchByIdExecutor;
@@ -62,6 +66,7 @@ public class BranchesController : ApiControllerBase
         _getBranchCustomersExecutor = getBranchCustomersExecutor;
         _getBranchOrdersExecutor = getBranchOrdersExecutor;
         _getBranchPendingPaymentOrdersExecutor = getBranchPendingPaymentOrdersExecutor;
+        _getBranchPaymentsExecutor = getBranchPaymentsExecutor;
     }
 
     /// <summary>
@@ -172,6 +177,26 @@ public class BranchesController : ApiControllerBase
         try
         {
             var response = await _getBranchPendingPaymentOrdersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists payments for a branch. CentralOffice or BranchAdmin of that branch.
+    /// </summary>
+    [HttpGet("{branchId:guid}/payments")]
+    [ProducesResponseType(typeof(IReadOnlyList<PaymentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBranchPayments(Guid branchId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getBranchPaymentsExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

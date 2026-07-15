@@ -29,6 +29,7 @@ public abstract class OrderExecutorBase
         StaffId = order.StaffId,
         BranchId = order.BranchId,
         TotalPrice = order.TotalPrice,
+        Date = order.Date,
         Completed = order.Completed,
         Cancelled = order.Cancelled,
         PaymentId = order.PaymentId,

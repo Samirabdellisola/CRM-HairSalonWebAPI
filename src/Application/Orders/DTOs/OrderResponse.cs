@@ -12,6 +12,8 @@ public class OrderResponse
 
     public decimal TotalPrice { get; set; }
 
+    public DateTime Date { get; set; }
+
     public bool Completed { get; set; }
 
     public bool Cancelled { get; set; }

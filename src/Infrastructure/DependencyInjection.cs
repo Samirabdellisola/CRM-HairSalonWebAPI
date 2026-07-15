@@ -8,6 +8,7 @@ using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Customers.Executors;
 using SalonCRM.Application.Orders.Executors;
+using SalonCRM.Application.Payments.Executors;
 using SalonCRM.Application.Services.Executors;
 using SalonCRM.Application.Staff.Executors;
 using SalonCRM.Application.Users.Executors;
@@ -19,6 +20,7 @@ using SalonCRM.Infrastructure.Services.Branches.Executors;
 using SalonCRM.Infrastructure.Services.Common;
 using SalonCRM.Infrastructure.Services.Customers.Executors;
 using SalonCRM.Infrastructure.Services.Orders.Executors;
+using SalonCRM.Infrastructure.Services.Payments.Executors;
 using SalonCRM.Infrastructure.Services.Services.Executors;
 using SalonCRM.Infrastructure.Services.Staff.Executors;
 using SalonCRM.Infrastructure.Services.Users.Executors;
@@ -108,6 +110,12 @@ public static class DependencyInjection
         services.AddScoped<ICancelOrderExecutor, CancelOrderExecutor>();
         services.AddScoped<IGetPendingPaymentOrdersExecutor, GetPendingPaymentOrdersExecutor>();
         services.AddScoped<IGetBranchPendingPaymentOrdersExecutor, GetBranchPendingPaymentOrdersExecutor>();
+
+        services.AddScoped<IGetPaymentsExecutor, GetPaymentsExecutor>();
+        services.AddScoped<IGetPaymentByIdExecutor, GetPaymentByIdExecutor>();
+        services.AddScoped<IGetOrderPaymentsExecutor, GetOrderPaymentsExecutor>();
+        services.AddScoped<IGetBranchPaymentsExecutor, GetBranchPaymentsExecutor>();
+        services.AddScoped<ICreatePaymentExecutor, CreatePaymentExecutor>();
 
         // Repository implementations will be registered here as the CRM grows.
 

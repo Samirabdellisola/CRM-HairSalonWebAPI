@@ -33,6 +33,7 @@ public class CreateOrderExecutor : OrderExecutorBase, ICreateOrderExecutor
             StaffId = staff.Id,
             BranchId = branchId,
             Comment = string.IsNullOrWhiteSpace(request.Comment) ? null : request.Comment.Trim(),
+            Date = request.Date?.ToUniversalTime() ?? DateTime.UtcNow,
             Completed = false,
             Cancelled = false
         };

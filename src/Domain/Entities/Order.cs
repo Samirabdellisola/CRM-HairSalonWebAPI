@@ -24,14 +24,21 @@ public class Order : BaseEntity
 
     public decimal TotalPrice { get; set; }
 
+    /// <summary>
+    /// Business date of the order (UTC).
+    /// </summary>
+    public DateTime Date { get; set; }
+
     public bool Completed { get; set; }
 
     public bool Cancelled { get; set; }
 
     /// <summary>
-    /// Optional payment reference. Payment entity will be added later; no FK yet.
+    /// Optional payment reference once a payment has been created for this order.
     /// </summary>
     public Guid? PaymentId { get; set; }
+
+    public Payment? Payment { get; set; }
 
     public string? Comment { get; set; }
 
