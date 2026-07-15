@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Profile> Profiles => Set<Profile>();
+    public DbSet<Service> Services => Set<Service>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -94,6 +95,21 @@ public class AppDbContext : DbContext
                 .HasForeignKey<Profile>(e => e.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Service>(entity =>
+        {
+            entity.ToTable("services");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Price).HasPrecision(18, 2);
+            entity.Property(e => e.ImagePath).HasMaxLength(500);
+            entity.HasIndex(e => new { e.BranchId, e.Name }).IsUnique();
+            entity.HasOne(e => e.Branch)
+                .WithMany()
+                .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

@@ -7,6 +7,7 @@ using SalonCRM.Application.Auth.Executors;
 using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Customers.Executors;
+using SalonCRM.Application.Services.Executors;
 using SalonCRM.Application.Staff.Executors;
 using SalonCRM.Application.Users.Executors;
 using SalonCRM.Domain.Entities;
@@ -16,6 +17,7 @@ using SalonCRM.Infrastructure.Services.Auth.Executors;
 using SalonCRM.Infrastructure.Services.Branches.Executors;
 using SalonCRM.Infrastructure.Services.Common;
 using SalonCRM.Infrastructure.Services.Customers.Executors;
+using SalonCRM.Infrastructure.Services.Services.Executors;
 using SalonCRM.Infrastructure.Services.Staff.Executors;
 using SalonCRM.Infrastructure.Services.Users.Executors;
 
@@ -84,6 +86,12 @@ public static class DependencyInjection
         services.AddScoped<IUpdateCustomerProfileExecutor, UpdateCustomerProfileExecutor>();
         services.AddScoped<IUploadCustomerPhotoExecutor, UploadCustomerPhotoExecutor>();
         services.AddScoped<IGetSpecialDatesExecutor, GetSpecialDatesExecutor>();
+
+        services.AddScoped<IGetServicesExecutor, GetServicesExecutor>();
+        services.AddScoped<IGetServiceByIdExecutor, GetServiceByIdExecutor>();
+        services.AddScoped<ICreateServiceExecutor, CreateServiceExecutor>();
+        services.AddScoped<IUpdateServiceExecutor, UpdateServiceExecutor>();
+        services.AddScoped<IDeleteServiceExecutor, DeleteServiceExecutor>();
 
         // Repository implementations will be registered here as the CRM grows.
 
