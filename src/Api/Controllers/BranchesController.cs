@@ -6,6 +6,8 @@ using SalonCRM.Application.Common.DTOs;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Customers.DTOs;
 using SalonCRM.Application.Customers.Executors;
+using SalonCRM.Application.Orders.DTOs;
+using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Application.Staff.DTOs;
 using SalonCRM.Application.Staff.Executors;
 
@@ -31,6 +33,8 @@ public class BranchesController : ApiControllerBase
     private readonly IAssignBranchAdminExecutor _assignBranchAdminExecutor;
     private readonly IGetBranchStaffExecutor _getBranchStaffExecutor;
     private readonly IGetBranchCustomersExecutor _getBranchCustomersExecutor;
+    private readonly IGetBranchOrdersExecutor _getBranchOrdersExecutor;
+    private readonly IGetBranchPendingPaymentOrdersExecutor _getBranchPendingPaymentOrdersExecutor;
 
     public BranchesController(
         IGetBranchesExecutor getBranchesExecutor,
@@ -42,7 +46,9 @@ public class BranchesController : ApiControllerBase
         IFreezeBranchExecutor freezeBranchExecutor,
         IAssignBranchAdminExecutor assignBranchAdminExecutor,
         IGetBranchStaffExecutor getBranchStaffExecutor,
-        IGetBranchCustomersExecutor getBranchCustomersExecutor)
+        IGetBranchCustomersExecutor getBranchCustomersExecutor,
+        IGetBranchOrdersExecutor getBranchOrdersExecutor,
+        IGetBranchPendingPaymentOrdersExecutor getBranchPendingPaymentOrdersExecutor)
     {
         _getBranchesExecutor = getBranchesExecutor;
         _getBranchByIdExecutor = getBranchByIdExecutor;
@@ -54,6 +60,8 @@ public class BranchesController : ApiControllerBase
         _assignBranchAdminExecutor = assignBranchAdminExecutor;
         _getBranchStaffExecutor = getBranchStaffExecutor;
         _getBranchCustomersExecutor = getBranchCustomersExecutor;
+        _getBranchOrdersExecutor = getBranchOrdersExecutor;
+        _getBranchPendingPaymentOrdersExecutor = getBranchPendingPaymentOrdersExecutor;
     }
 
     /// <summary>
@@ -124,6 +132,46 @@ public class BranchesController : ApiControllerBase
         try
         {
             var response = await _getBranchCustomersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists orders for a branch. CentralOffice or BranchAdmin of that branch.
+    /// </summary>
+    [HttpGet("{branchId:guid}/orders")]
+    [ProducesResponseType(typeof(IReadOnlyList<OrderResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBranchOrders(Guid branchId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getBranchOrdersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists orders for a branch that have no PaymentId.
+    /// </summary>
+    [HttpGet("{branchId:guid}/orders/pending-payment")]
+    [ProducesResponseType(typeof(IReadOnlyList<OrderResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBranchPendingPaymentOrders(Guid branchId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getBranchPendingPaymentOrdersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

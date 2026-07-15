@@ -7,6 +7,7 @@ using SalonCRM.Application.Auth.Executors;
 using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Customers.Executors;
+using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Application.Services.Executors;
 using SalonCRM.Application.Staff.Executors;
 using SalonCRM.Application.Users.Executors;
@@ -17,6 +18,7 @@ using SalonCRM.Infrastructure.Services.Auth.Executors;
 using SalonCRM.Infrastructure.Services.Branches.Executors;
 using SalonCRM.Infrastructure.Services.Common;
 using SalonCRM.Infrastructure.Services.Customers.Executors;
+using SalonCRM.Infrastructure.Services.Orders.Executors;
 using SalonCRM.Infrastructure.Services.Services.Executors;
 using SalonCRM.Infrastructure.Services.Staff.Executors;
 using SalonCRM.Infrastructure.Services.Users.Executors;
@@ -92,6 +94,20 @@ public static class DependencyInjection
         services.AddScoped<ICreateServiceExecutor, CreateServiceExecutor>();
         services.AddScoped<IUpdateServiceExecutor, UpdateServiceExecutor>();
         services.AddScoped<IDeleteServiceExecutor, DeleteServiceExecutor>();
+
+        services.AddScoped<IGetOrdersExecutor, GetOrdersExecutor>();
+        services.AddScoped<IGetOrderByIdExecutor, GetOrderByIdExecutor>();
+        services.AddScoped<IGetBranchOrdersExecutor, GetBranchOrdersExecutor>();
+        services.AddScoped<IGetCustomerOrdersExecutor, GetCustomerOrdersExecutor>();
+        services.AddScoped<IGetStaffOrdersExecutor, GetStaffOrdersExecutor>();
+        services.AddScoped<ICreateOrderExecutor, CreateOrderExecutor>();
+        services.AddScoped<IUpdateOrderExecutor, UpdateOrderExecutor>();
+        services.AddScoped<IAddOrderServiceExecutor, AddOrderServiceExecutor>();
+        services.AddScoped<IRemoveOrderServiceExecutor, RemoveOrderServiceExecutor>();
+        services.AddScoped<ICompleteOrderExecutor, CompleteOrderExecutor>();
+        services.AddScoped<ICancelOrderExecutor, CancelOrderExecutor>();
+        services.AddScoped<IGetPendingPaymentOrdersExecutor, GetPendingPaymentOrdersExecutor>();
+        services.AddScoped<IGetBranchPendingPaymentOrdersExecutor, GetBranchPendingPaymentOrdersExecutor>();
 
         // Repository implementations will be registered here as the CRM grows.
 

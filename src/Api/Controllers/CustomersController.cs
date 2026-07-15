@@ -4,6 +4,8 @@ using SalonCRM.Application.Common.DTOs;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Customers.DTOs;
 using SalonCRM.Application.Customers.Executors;
+using SalonCRM.Application.Orders.DTOs;
+using SalonCRM.Application.Orders.Executors;
 
 namespace SalonCRM.Api.Controllers;
 
@@ -22,6 +24,7 @@ public class CustomersController : ApiControllerBase
     private readonly IUpdateCustomerProfileExecutor _updateCustomerProfileExecutor;
     private readonly IUploadCustomerPhotoExecutor _uploadCustomerPhotoExecutor;
     private readonly IGetSpecialDatesExecutor _getSpecialDatesExecutor;
+    private readonly IGetCustomerOrdersExecutor _getCustomerOrdersExecutor;
 
     public CustomersController(
         IGetCustomersExecutor getCustomersExecutor,
@@ -30,7 +33,8 @@ public class CustomersController : ApiControllerBase
         IGetCustomerProfileExecutor getCustomerProfileExecutor,
         IUpdateCustomerProfileExecutor updateCustomerProfileExecutor,
         IUploadCustomerPhotoExecutor uploadCustomerPhotoExecutor,
-        IGetSpecialDatesExecutor getSpecialDatesExecutor)
+        IGetSpecialDatesExecutor getSpecialDatesExecutor,
+        IGetCustomerOrdersExecutor getCustomerOrdersExecutor)
     {
         _getCustomersExecutor = getCustomersExecutor;
         _getCustomerByIdExecutor = getCustomerByIdExecutor;
@@ -39,6 +43,7 @@ public class CustomersController : ApiControllerBase
         _updateCustomerProfileExecutor = updateCustomerProfileExecutor;
         _uploadCustomerPhotoExecutor = uploadCustomerPhotoExecutor;
         _getSpecialDatesExecutor = getSpecialDatesExecutor;
+        _getCustomerOrdersExecutor = getCustomerOrdersExecutor;
     }
 
     /// <summary>
@@ -91,6 +96,26 @@ public class CustomersController : ApiControllerBase
         try
         {
             var response = await _getCustomerByIdExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists orders for a customer. CentralOffice, BranchAdmin of their branch, or the customer themselves.
+    /// </summary>
+    [HttpGet("{customerId:guid}/orders")]
+    [ProducesResponseType(typeof(IReadOnlyList<OrderResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCustomerOrders(Guid customerId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getCustomerOrdersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), customerId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

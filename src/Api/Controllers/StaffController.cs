@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SalonCRM.Application.Common.DTOs;
 using SalonCRM.Application.Common.Exceptions;
+using SalonCRM.Application.Orders.DTOs;
+using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Application.Staff.DTOs;
 using SalonCRM.Application.Staff.Executors;
 
@@ -22,6 +24,7 @@ public class StaffController : ApiControllerBase
     private readonly IActivateStaffExecutor _activateStaffExecutor;
     private readonly IDeactivateStaffExecutor _deactivateStaffExecutor;
     private readonly IFreezeStaffExecutor _freezeStaffExecutor;
+    private readonly IGetStaffOrdersExecutor _getStaffOrdersExecutor;
 
     public StaffController(
         IGetStaffListExecutor getStaffListExecutor,
@@ -29,7 +32,8 @@ public class StaffController : ApiControllerBase
         IUpdateStaffExecutor updateStaffExecutor,
         IActivateStaffExecutor activateStaffExecutor,
         IDeactivateStaffExecutor deactivateStaffExecutor,
-        IFreezeStaffExecutor freezeStaffExecutor)
+        IFreezeStaffExecutor freezeStaffExecutor,
+        IGetStaffOrdersExecutor getStaffOrdersExecutor)
     {
         _getStaffListExecutor = getStaffListExecutor;
         _getStaffByIdExecutor = getStaffByIdExecutor;
@@ -37,6 +41,7 @@ public class StaffController : ApiControllerBase
         _activateStaffExecutor = activateStaffExecutor;
         _deactivateStaffExecutor = deactivateStaffExecutor;
         _freezeStaffExecutor = freezeStaffExecutor;
+        _getStaffOrdersExecutor = getStaffOrdersExecutor;
     }
 
     /// <summary>
@@ -70,6 +75,26 @@ public class StaffController : ApiControllerBase
         try
         {
             var response = await _getStaffByIdExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists orders for a staff member. CentralOffice, BranchAdmin of their branch, or the staff themselves.
+    /// </summary>
+    [HttpGet("{staffId:guid}/orders")]
+    [ProducesResponseType(typeof(IReadOnlyList<OrderResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetStaffOrders(Guid staffId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getStaffOrdersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), staffId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

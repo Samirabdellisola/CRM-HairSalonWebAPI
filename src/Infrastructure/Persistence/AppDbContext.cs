@@ -16,6 +16,8 @@ public class AppDbContext : DbContext
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Service> Services => Set<Service>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -108,6 +110,52 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Branch)
                 .WithMany()
                 .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("orders");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TotalPrice).HasPrecision(18, 2);
+            entity.Property(e => e.Comment).HasMaxLength(2000);
+            entity.HasIndex(e => e.BranchId);
+            entity.HasIndex(e => e.CustomerId);
+            entity.HasIndex(e => e.StaffId);
+            entity.HasIndex(e => e.PaymentId);
+            entity.HasOne(e => e.Customer)
+                .WithMany()
+                .HasForeignKey(e => e.CustomerId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Staff)
+                .WithMany()
+                .HasForeignKey(e => e.StaffId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Branch)
+                .WithMany()
+                .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("order_items");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ServiceName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.ServicePrice).HasPrecision(18, 2);
+            entity.HasIndex(e => new { e.OrderId, e.ServiceId }).IsUnique();
+            entity.HasOne(e => e.Order)
+                .WithMany(o => o.Items)
+                .HasForeignKey(e => e.OrderId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         });
