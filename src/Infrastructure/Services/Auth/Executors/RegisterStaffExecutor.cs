@@ -34,6 +34,11 @@ public class RegisterStaffExecutor : AuthExecutorBase, IRegisterStaffExecutor
         RegisterStaffRequest request,
         CancellationToken cancellationToken = default)
     {
+        if (callerRole != UserRole.CentralOffice && callerRole != UserRole.BranchAdmin)
+        {
+            throw new AppException("Only CentralOffice or the BranchAdmin of the target branch can register staff.", AppErrorType.Forbidden);
+        }
+
         var branchExists = await DbContext.Branches.AnyAsync(b => b.Id == request.BranchId, cancellationToken);
         if (!branchExists)
         {
