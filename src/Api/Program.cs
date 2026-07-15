@@ -21,6 +21,9 @@ if (!app.Environment.IsProduction())
     app.UseHttpsRedirection();
 }
 
+Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "wwwroot"));
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

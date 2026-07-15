@@ -32,11 +32,18 @@ public class User : BaseEntity
     public string? Address { get; set; }
 
     /// <summary>
-    /// Associates Staff/BranchAdmin accounts to a branch. Not used for Customer/CentralOffice.
+    /// Optional birthday. Used for special-dates listings.
+    /// </summary>
+    public DateOnly? Birthday { get; set; }
+
+    /// <summary>
+    /// Associates Staff/BranchAdmin/Customer accounts to a branch. Not used for CentralOffice.
     /// </summary>
     public Guid? BranchId { get; set; }
 
     public Branch? Branch { get; set; }
+
+    public Profile? Profile { get; set; }
 
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 

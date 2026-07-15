@@ -15,4 +15,12 @@ public class RegisterCustomerRequest
 
     [MaxLength(50)]
     public string? Phone { get; set; }
+
+    /// <summary>
+    /// Branch the customer belongs to. Required for branch-scoped listings.
+    /// </summary>
+    [Required]
+    public Guid BranchId { get; set; }
+
+    public DateOnly? Birthday { get; set; }
 }

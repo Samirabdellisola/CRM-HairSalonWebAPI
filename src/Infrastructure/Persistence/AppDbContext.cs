@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Branch> Branches => Set<Branch>();
+    public DbSet<Profile> Profiles => Set<Profile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -76,6 +77,21 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.User)
                 .WithMany(u => u.PasswordResetTokens)
                 .HasForeignKey(e => e.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Profile>(entity =>
+        {
+            entity.ToTable("profiles");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.HairColor).HasMaxLength(100);
+            entity.Property(e => e.PhotoPath).HasMaxLength(500);
+            entity.Property(e => e.Preferences).HasMaxLength(2000);
+            entity.HasIndex(e => e.UserId).IsUnique();
+            entity.HasOne(e => e.User)
+                .WithOne(u => u.Profile)
+                .HasForeignKey<Profile>(e => e.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         });

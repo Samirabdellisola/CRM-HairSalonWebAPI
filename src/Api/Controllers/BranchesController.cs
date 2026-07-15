@@ -4,6 +4,8 @@ using SalonCRM.Application.Branches.DTOs;
 using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Common.DTOs;
 using SalonCRM.Application.Common.Exceptions;
+using SalonCRM.Application.Customers.DTOs;
+using SalonCRM.Application.Customers.Executors;
 using SalonCRM.Application.Staff.DTOs;
 using SalonCRM.Application.Staff.Executors;
 
@@ -28,6 +30,7 @@ public class BranchesController : ApiControllerBase
     private readonly IFreezeBranchExecutor _freezeBranchExecutor;
     private readonly IAssignBranchAdminExecutor _assignBranchAdminExecutor;
     private readonly IGetBranchStaffExecutor _getBranchStaffExecutor;
+    private readonly IGetBranchCustomersExecutor _getBranchCustomersExecutor;
 
     public BranchesController(
         IGetBranchesExecutor getBranchesExecutor,
@@ -38,7 +41,8 @@ public class BranchesController : ApiControllerBase
         IActivateBranchExecutor activateBranchExecutor,
         IFreezeBranchExecutor freezeBranchExecutor,
         IAssignBranchAdminExecutor assignBranchAdminExecutor,
-        IGetBranchStaffExecutor getBranchStaffExecutor)
+        IGetBranchStaffExecutor getBranchStaffExecutor,
+        IGetBranchCustomersExecutor getBranchCustomersExecutor)
     {
         _getBranchesExecutor = getBranchesExecutor;
         _getBranchByIdExecutor = getBranchByIdExecutor;
@@ -49,6 +53,7 @@ public class BranchesController : ApiControllerBase
         _freezeBranchExecutor = freezeBranchExecutor;
         _assignBranchAdminExecutor = assignBranchAdminExecutor;
         _getBranchStaffExecutor = getBranchStaffExecutor;
+        _getBranchCustomersExecutor = getBranchCustomersExecutor;
     }
 
     /// <summary>
@@ -99,6 +104,26 @@ public class BranchesController : ApiControllerBase
         try
         {
             var response = await _getBranchStaffExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists Customer users belonging to a branch. CentralOffice or BranchAdmin of that branch.
+    /// </summary>
+    [HttpGet("{branchId:guid}/customers")]
+    [ProducesResponseType(typeof(IReadOnlyList<CustomerResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBranchCustomers(Guid branchId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getBranchCustomersExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)
