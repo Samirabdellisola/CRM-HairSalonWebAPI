@@ -6,6 +6,8 @@ using SalonCRM.Application.Common.DTOs;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Customers.DTOs;
 using SalonCRM.Application.Customers.Executors;
+using SalonCRM.Application.Expenses.DTOs;
+using SalonCRM.Application.Expenses.Executors;
 using SalonCRM.Application.Orders.DTOs;
 using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Application.Payments.DTOs;
@@ -38,6 +40,7 @@ public class BranchesController : ApiControllerBase
     private readonly IGetBranchOrdersExecutor _getBranchOrdersExecutor;
     private readonly IGetBranchPendingPaymentOrdersExecutor _getBranchPendingPaymentOrdersExecutor;
     private readonly IGetBranchPaymentsExecutor _getBranchPaymentsExecutor;
+    private readonly IGetBranchExpensesExecutor _getBranchExpensesExecutor;
 
     public BranchesController(
         IGetBranchesExecutor getBranchesExecutor,
@@ -52,7 +55,8 @@ public class BranchesController : ApiControllerBase
         IGetBranchCustomersExecutor getBranchCustomersExecutor,
         IGetBranchOrdersExecutor getBranchOrdersExecutor,
         IGetBranchPendingPaymentOrdersExecutor getBranchPendingPaymentOrdersExecutor,
-        IGetBranchPaymentsExecutor getBranchPaymentsExecutor)
+        IGetBranchPaymentsExecutor getBranchPaymentsExecutor,
+        IGetBranchExpensesExecutor getBranchExpensesExecutor)
     {
         _getBranchesExecutor = getBranchesExecutor;
         _getBranchByIdExecutor = getBranchByIdExecutor;
@@ -67,6 +71,7 @@ public class BranchesController : ApiControllerBase
         _getBranchOrdersExecutor = getBranchOrdersExecutor;
         _getBranchPendingPaymentOrdersExecutor = getBranchPendingPaymentOrdersExecutor;
         _getBranchPaymentsExecutor = getBranchPaymentsExecutor;
+        _getBranchExpensesExecutor = getBranchExpensesExecutor;
     }
 
     /// <summary>
@@ -197,6 +202,26 @@ public class BranchesController : ApiControllerBase
         try
         {
             var response = await _getBranchPaymentsExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Lists expenses for a branch. CentralOffice or BranchAdmin of that branch.
+    /// </summary>
+    [HttpGet("{branchId:guid}/expenses")]
+    [ProducesResponseType(typeof(IReadOnlyList<ExpenseResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBranchExpenses(Guid branchId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _getBranchExpensesExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), branchId, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

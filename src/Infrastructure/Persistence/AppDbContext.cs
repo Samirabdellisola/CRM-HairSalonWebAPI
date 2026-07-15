@@ -19,6 +19,8 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
+    public DbSet<Expense> Expenses => Set<Expense>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -192,6 +194,34 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Order)
                 .WithMany()
                 .HasForeignKey(e => e.OrderId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ExpenseCategory>(entity =>
+        {
+            entity.ToTable("expense_categories");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.HasIndex(e => new { e.BranchId, e.Name }).IsUnique();
+            entity.HasOne(e => e.Branch)
+                .WithMany()
+                .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.ToTable("expenses");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Price).HasPrecision(18, 2);
+            entity.HasIndex(e => e.ExpenseCategoryId);
+            entity.HasIndex(e => e.Date);
+            entity.HasOne(e => e.ExpenseCategory)
+                .WithMany(c => c.Expenses)
+                .HasForeignKey(e => e.ExpenseCategoryId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         });

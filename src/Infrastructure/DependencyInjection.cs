@@ -7,6 +7,7 @@ using SalonCRM.Application.Auth.Executors;
 using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Customers.Executors;
+using SalonCRM.Application.Expenses.Executors;
 using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Application.Payments.Executors;
 using SalonCRM.Application.Services.Executors;
@@ -19,6 +20,7 @@ using SalonCRM.Infrastructure.Services.Auth.Executors;
 using SalonCRM.Infrastructure.Services.Branches.Executors;
 using SalonCRM.Infrastructure.Services.Common;
 using SalonCRM.Infrastructure.Services.Customers.Executors;
+using SalonCRM.Infrastructure.Services.Expenses.Executors;
 using SalonCRM.Infrastructure.Services.Orders.Executors;
 using SalonCRM.Infrastructure.Services.Payments.Executors;
 using SalonCRM.Infrastructure.Services.Services.Executors;
@@ -116,6 +118,20 @@ public static class DependencyInjection
         services.AddScoped<IGetOrderPaymentsExecutor, GetOrderPaymentsExecutor>();
         services.AddScoped<IGetBranchPaymentsExecutor, GetBranchPaymentsExecutor>();
         services.AddScoped<ICreatePaymentExecutor, CreatePaymentExecutor>();
+
+        services.AddScoped<IGetExpenseCategoriesExecutor, GetExpenseCategoriesExecutor>();
+        services.AddScoped<IGetExpenseCategoryByIdExecutor, GetExpenseCategoryByIdExecutor>();
+        services.AddScoped<ICreateExpenseCategoryExecutor, CreateExpenseCategoryExecutor>();
+        services.AddScoped<IUpdateExpenseCategoryExecutor, UpdateExpenseCategoryExecutor>();
+        services.AddScoped<IDeleteExpenseCategoryExecutor, DeleteExpenseCategoryExecutor>();
+        services.AddScoped<IGetExpensesExecutor, GetExpensesExecutor>();
+        services.AddScoped<IGetExpenseByIdExecutor, GetExpenseByIdExecutor>();
+        services.AddScoped<IGetBranchExpensesExecutor, GetBranchExpensesExecutor>();
+        services.AddScoped<IGetExpenseCategoriesForExpensesExecutor, GetExpenseCategoriesForExpensesExecutor>();
+        services.AddScoped<ICreateExpenseExecutor, CreateExpenseExecutor>();
+        services.AddScoped<IUpdateExpenseExecutor, UpdateExpenseExecutor>();
+        services.AddScoped<IDeleteExpenseExecutor, DeleteExpenseExecutor>();
+        services.AddScoped<IGetExpensesByRangeExecutor, GetExpensesByRangeExecutor>();
 
         // Repository implementations will be registered here as the CRM grows.
 
