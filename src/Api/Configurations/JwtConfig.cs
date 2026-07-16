@@ -24,6 +24,8 @@ public static class JwtConfig
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                // Keep JWT claim names as emitted (e.g. "role"), so [Authorize(Roles = "...")] works.
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
