@@ -10,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
+builder.Services.AddCorsPolicy(builder.Configuration);
 
 var app = builder.Build();
 
@@ -23,6 +24,8 @@ if (!app.Environment.IsProduction())
 
 Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "wwwroot"));
 app.UseStaticFiles();
+
+app.UseCors(CorsConfig.PolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
