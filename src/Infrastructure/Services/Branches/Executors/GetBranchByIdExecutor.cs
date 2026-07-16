@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using SalonCRM.Application.Branches.DTOs;
 using SalonCRM.Application.Branches.Executors;
 using SalonCRM.Application.Common.Exceptions;
-using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
 
@@ -15,15 +14,9 @@ public class GetBranchByIdExecutor : BranchExecutorBase, IGetBranchByIdExecutor
     {
     }
 
-    public async Task<BranchResponse> ExecuteAsync(
-        Guid callerId,
-        UserRole callerRole,
-        Guid branchId,
-        CancellationToken cancellationToken = default)
+    public async Task<BranchResponse> ExecuteAsync(Guid branchId, CancellationToken cancellationToken = default)
     {
-        await EnsureCanManageBranchAsync(callerId, callerRole, branchId, cancellationToken);
-
-        var branch = await DbContext.Branches.FirstOrDefaultAsync(b => b.Id == branchId, cancellationToken);
+        var branch = await BranchesWithAdmin.FirstOrDefaultAsync(b => b.Id == branchId, cancellationToken);
         if (branch is null)
         {
             throw new AppException("Branch not found.", AppErrorType.NotFound);

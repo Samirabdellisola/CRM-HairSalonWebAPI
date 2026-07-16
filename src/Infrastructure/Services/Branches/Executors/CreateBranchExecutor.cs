@@ -63,6 +63,7 @@ public class CreateBranchExecutor : BranchExecutorBase, ICreateBranchExecutor
 
         admin.BranchId = branch.Id;
         branch.AdminId = admin.Id;
+        branch.AdminUser = admin;
         await DbContext.SaveChangesAsync(cancellationToken);
 
         return ToResponse(branch);

@@ -19,8 +19,8 @@ namespace SalonCRM.Api.Controllers;
 
 /// <summary>
 /// Branch management: list/get/create/update, activate/deactivate/freeze,
-/// and assign BranchAdmin. Creation is CentralOffice-only; other write actions
-/// allow the BranchAdmin of that specific branch.
+/// and assign BranchAdmin. List and get-by-id are public; creation is
+/// CentralOffice-only; other write actions allow the BranchAdmin of that branch.
 /// </summary>
 [Route("branches")]
 [Produces("application/json")]
@@ -74,16 +74,15 @@ public class BranchesController : ApiControllerBase
         _getBranchExpensesExecutor = getBranchExpensesExecutor;
     }
 
-    /// <summary>
-    /// Lists branches. CentralOffice sees all; BranchAdmin sees only the branch they administer.
-    /// </summary>
+    /// <summary>Lists all branches. No authentication required.</summary>
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IReadOnlyList<BranchResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBranches(CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _getBranchesExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), cancellationToken);
+            var response = await _getBranchesExecutor.ExecuteAsync(cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)
@@ -92,16 +91,16 @@ public class BranchesController : ApiControllerBase
         }
     }
 
-    /// <summary>Returns a specific branch by id.</summary>
+    /// <summary>Returns a specific branch by id. No authentication required.</summary>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(BranchResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBranchById(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _getBranchByIdExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, cancellationToken);
+            var response = await _getBranchByIdExecutor.ExecuteAsync(id, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

@@ -1,15 +1,11 @@
 using SalonCRM.Application.Branches.DTOs;
-using SalonCRM.Domain.Enums;
 
 namespace SalonCRM.Application.Branches.Executors;
 
 /// <summary>
-/// Lists branches. CentralOffice sees all; BranchAdmin sees only the branch they administer.
+/// Lists all branches. Public (no authentication required).
 /// </summary>
 public interface IGetBranchesExecutor
 {
-    Task<IReadOnlyList<BranchResponse>> ExecuteAsync(
-        Guid callerId,
-        UserRole callerRole,
-        CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<BranchResponse>> ExecuteAsync(CancellationToken cancellationToken = default);
 }

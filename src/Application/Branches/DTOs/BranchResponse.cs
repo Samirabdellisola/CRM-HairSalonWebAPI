@@ -14,7 +14,10 @@ public class BranchResponse
 
     public bool IsFrozen { get; set; }
 
-    public Guid? AdminId { get; set; }
+    /// <summary>
+    /// Display name of the BranchAdmin. Null when no admin is assigned.
+    /// </summary>
+    public string? AdminName { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

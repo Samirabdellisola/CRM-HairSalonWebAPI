@@ -22,6 +22,9 @@ public abstract class BranchExecutorBase
         BranchScopeChecker = branchScopeChecker;
     }
 
+    protected IQueryable<Branch> BranchesWithAdmin =>
+        DbContext.Branches.Include(b => b.AdminUser);
+
     protected static BranchResponse ToResponse(Branch branch) => new()
     {
         Id = branch.Id,
@@ -30,7 +33,7 @@ public abstract class BranchExecutorBase
         Phone = branch.Phone,
         IsActive = branch.IsActive,
         IsFrozen = branch.IsFrozen,
-        AdminId = branch.AdminId,
+        AdminName = branch.AdminUser?.Name,
         CreatedAt = branch.CreatedAt,
         UpdatedAt = branch.UpdatedAt
     };

@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SalonCRM.Application.Branches.DTOs;
 using SalonCRM.Application.Branches.Executors;
-using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
 
@@ -14,23 +13,9 @@ public class GetBranchesExecutor : BranchExecutorBase, IGetBranchesExecutor
     {
     }
 
-    public async Task<IReadOnlyList<BranchResponse>> ExecuteAsync(
-        Guid callerId,
-        UserRole callerRole,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<BranchResponse>> ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        if (callerRole == UserRole.BranchAdmin)
-        {
-            var administeredBranch = await BranchScopeChecker.GetAdministeredBranchAsync(callerId, cancellationToken);
-            if (administeredBranch is null)
-            {
-                return Array.Empty<BranchResponse>();
-            }
-
-            return new[] { ToResponse(administeredBranch) };
-        }
-
-        var branches = await DbContext.Branches
+        var branches = await BranchesWithAdmin
             .OrderBy(b => b.Name)
             .ToListAsync(cancellationToken);
 

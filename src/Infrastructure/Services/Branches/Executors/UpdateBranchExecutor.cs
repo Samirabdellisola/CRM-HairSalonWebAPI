@@ -24,7 +24,7 @@ public class UpdateBranchExecutor : BranchExecutorBase, IUpdateBranchExecutor
     {
         await EnsureCanManageBranchAsync(callerId, callerRole, branchId, cancellationToken);
 
-        var branch = await DbContext.Branches.FirstOrDefaultAsync(b => b.Id == branchId, cancellationToken);
+        var branch = await BranchesWithAdmin.FirstOrDefaultAsync(b => b.Id == branchId, cancellationToken);
         if (branch is null)
         {
             throw new AppException("Branch not found.", AppErrorType.NotFound);
