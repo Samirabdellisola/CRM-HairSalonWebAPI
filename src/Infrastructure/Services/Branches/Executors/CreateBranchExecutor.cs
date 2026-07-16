@@ -51,6 +51,7 @@ public class CreateBranchExecutor : BranchExecutorBase, ICreateBranchExecutor
         var admin = new User
         {
             Email = email,
+            Name = request.AdminName.Trim(),
             Role = UserRole.BranchAdmin,
             IsActive = true
         };

@@ -41,6 +41,11 @@ public class UpdateStaffExecutor : StaffExecutorBase, IUpdateStaffExecutor
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            staff.Name = request.Name.Trim();
+        }
+
         if (request.Phone is not null)
         {
             staff.Phone = request.Phone;

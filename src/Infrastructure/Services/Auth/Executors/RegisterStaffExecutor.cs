@@ -60,6 +60,7 @@ public class RegisterStaffExecutor : AuthExecutorBase, IRegisterStaffExecutor
         var user = new User
         {
             Email = email,
+            Name = request.Name.Trim(),
             Role = UserRole.Staff,
             BranchId = request.BranchId,
             IsActive = true

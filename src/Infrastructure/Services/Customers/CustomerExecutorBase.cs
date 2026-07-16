@@ -26,6 +26,7 @@ public abstract class CustomerExecutorBase
     {
         Id = user.Id,
         Email = user.Email,
+        Name = user.Name,
         Role = user.Role,
         Phone = user.Phone,
         Address = user.Address,

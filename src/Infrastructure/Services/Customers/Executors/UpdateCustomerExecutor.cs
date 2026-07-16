@@ -41,6 +41,11 @@ public class UpdateCustomerExecutor : CustomerExecutorBase, IUpdateCustomerExecu
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            customer.Name = request.Name.Trim();
+        }
+
         if (request.Phone is not null)
         {
             customer.Phone = request.Phone;

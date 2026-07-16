@@ -10,6 +10,9 @@ public class RegisterStaffRequest
     [Required, MinLength(8)]
     public string Password { get; set; } = string.Empty;
 
+    [Required, MaxLength(200)]
+    public string Name { get; set; } = string.Empty;
+
     /// <summary>
     /// Branch the new Staff user is assigned to. Required; when the caller is a
     /// BranchAdmin, it must match the branch they administer.

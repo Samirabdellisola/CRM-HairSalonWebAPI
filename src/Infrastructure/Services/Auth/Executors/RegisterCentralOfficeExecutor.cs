@@ -37,6 +37,7 @@ public class RegisterCentralOfficeExecutor : AuthExecutorBase, IRegisterCentralO
         var user = new User
         {
             Email = email,
+            Name = request.Name.Trim(),
             Role = UserRole.CentralOffice,
             IsActive = true
         };

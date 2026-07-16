@@ -40,6 +40,8 @@ public class RefreshTokenExecutor : AuthExecutorBase, IRefreshTokenExecutor
             throw new AppException("Invalid or expired refresh token.", AppErrorType.Unauthorized);
         }
 
+        EnsureNonCentralOfficeHasBranch(existingToken.User);
+
         existingToken.RevokedAt = utcNow;
 
         return await IssueTokensAsync(existingToken.User, cancellationToken);

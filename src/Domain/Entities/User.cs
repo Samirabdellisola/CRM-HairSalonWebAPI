@@ -12,6 +12,11 @@ public class User : BaseEntity
 
     public string PasswordHash { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Display name of the user.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
     public UserRole Role { get; set; }
 
     public bool IsActive { get; set; } = true;
@@ -37,7 +42,7 @@ public class User : BaseEntity
     public DateOnly? Birthday { get; set; }
 
     /// <summary>
-    /// Associates Staff/BranchAdmin/Customer accounts to a branch. Not used for CentralOffice.
+    /// Required for Staff, BranchAdmin, and Customer. Null only for CentralOffice.
     /// </summary>
     public Guid? BranchId { get; set; }
 

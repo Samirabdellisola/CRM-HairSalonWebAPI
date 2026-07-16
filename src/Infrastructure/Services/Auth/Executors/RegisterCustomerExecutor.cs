@@ -37,6 +37,7 @@ public class RegisterCustomerExecutor : AuthExecutorBase, IRegisterCustomerExecu
         var user = new User
         {
             Email = email,
+            Name = request.Name.Trim(),
             Role = UserRole.Customer,
             Phone = request.Phone,
             BranchId = request.BranchId,

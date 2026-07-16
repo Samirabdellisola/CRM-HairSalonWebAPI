@@ -7,6 +7,7 @@ using SalonCRM.Application.Auth.DTOs;
 using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Domain.Entities;
+using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 
 namespace SalonCRM.Infrastructure.Services.Auth;
@@ -97,6 +98,16 @@ public abstract class AuthExecutorBase
     {
         UserId = user.Id,
         Email = user.Email,
-        Role = user.Role.ToString()
+        Name = user.Name,
+        Role = user.Role.ToString(),
+        BranchId = user.BranchId
     };
+
+    protected static void EnsureNonCentralOfficeHasBranch(User user)
+    {
+        if (user.Role != UserRole.CentralOffice && !user.BranchId.HasValue)
+        {
+            throw new AppException("User must be assigned to a branch.", AppErrorType.Validation);
+        }
+    }
 }

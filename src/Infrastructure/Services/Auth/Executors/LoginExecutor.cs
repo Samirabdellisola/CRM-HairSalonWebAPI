@@ -43,13 +43,17 @@ public class LoginExecutor : AuthExecutorBase, ILoginExecutor
             user.PasswordHash = PasswordHasher.HashPassword(user, request.Password);
         }
 
+        EnsureNonCentralOfficeHasBranch(user);
+
         var tokens = await IssueTokensAsync(user, cancellationToken);
 
         return new LoginResponse
         {
             UserId = user.Id,
             Email = user.Email,
+            Name = user.Name,
             Role = user.Role.ToString(),
+            BranchId = user.BranchId,
             Tokens = tokens
         };
     }

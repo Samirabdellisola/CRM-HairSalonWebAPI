@@ -58,6 +58,11 @@ public class UpdateUserRoleExecutor : IUpdateUserRoleExecutor
             }
         }
 
+        if (request.NewRole != UserRole.CentralOffice && !targetUser.BranchId.HasValue)
+        {
+            throw new AppException("User must be assigned to a branch before changing role.", AppErrorType.Validation);
+        }
+
         targetUser.Role = request.NewRole;
 
         var utcNow = DateTime.UtcNow;
@@ -76,6 +81,7 @@ public class UpdateUserRoleExecutor : IUpdateUserRoleExecutor
         {
             Id = targetUser.Id,
             Email = targetUser.Email,
+            Name = targetUser.Name,
             Role = targetUser.Role,
             Phone = targetUser.Phone,
             Address = targetUser.Address,

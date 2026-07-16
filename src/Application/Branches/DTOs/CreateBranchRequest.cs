@@ -13,6 +13,9 @@ public class CreateBranchRequest
     [Required, MaxLength(50)]
     public string Phone { get; set; } = string.Empty;
 
+    [Required, MaxLength(200)]
+    public string AdminName { get; set; } = string.Empty;
+
     [Required, EmailAddress]
     public string AdminEmail { get; set; } = string.Empty;
 

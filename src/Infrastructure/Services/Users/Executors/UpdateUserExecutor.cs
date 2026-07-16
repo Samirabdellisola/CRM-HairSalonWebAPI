@@ -53,6 +53,11 @@ public class UpdateUserExecutor : IUpdateUserExecutor
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            targetUser.Name = request.Name.Trim();
+        }
+
         if (request.Phone is not null)
         {
             targetUser.Phone = request.Phone;
@@ -90,6 +95,7 @@ public class UpdateUserExecutor : IUpdateUserExecutor
     {
         Id = user.Id,
         Email = user.Email,
+        Name = user.Name,
         Role = user.Role,
         Phone = user.Phone,
         Address = user.Address,
