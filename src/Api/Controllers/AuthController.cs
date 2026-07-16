@@ -48,7 +48,11 @@ public class AuthController : ApiControllerBase
     }
 
     /// <summary>Authenticates a user with email and password.</summary>
-    /// <remarks>Returns a short-lived access token and a long-lived refresh token.</remarks>
+    /// <remarks>
+    /// Optional <c>branchId</c> scopes login to that branch.
+    /// Omit <c>branchId</c> to authenticate the Central Office account only.
+    /// Returns a short-lived access token and a long-lived refresh token.
+    /// </remarks>
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]

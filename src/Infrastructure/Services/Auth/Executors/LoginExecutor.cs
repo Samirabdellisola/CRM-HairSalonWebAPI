@@ -7,6 +7,7 @@ using SalonCRM.Application.Auth.Executors;
 using SalonCRM.Application.Auth.Options;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Domain.Entities;
+using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 
 namespace SalonCRM.Infrastructure.Services.Auth.Executors;
@@ -25,7 +26,7 @@ public class LoginExecutor : AuthExecutorBase, ILoginExecutor
     public async Task<LoginResponse> ExecuteAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var email = NormalizeEmail(request.Email);
-        var user = await DbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        var user = await FindUserForLoginAsync(email, request.BranchId, cancellationToken);
 
         if (user is null || !user.IsActive || user.IsFrozen)
         {
@@ -56,5 +57,22 @@ public class LoginExecutor : AuthExecutorBase, ILoginExecutor
             BranchId = user.BranchId,
             Tokens = tokens
         };
+    }
+
+    private async Task<User?> FindUserForLoginAsync(
+        string email,
+        Guid? branchId,
+        CancellationToken cancellationToken)
+    {
+        if (branchId.HasValue)
+        {
+            return await DbContext.Users.FirstOrDefaultAsync(
+                u => u.Email == email && u.BranchId == branchId.Value,
+                cancellationToken);
+        }
+
+        return await DbContext.Users.FirstOrDefaultAsync(
+            u => u.Email == email && u.Role == UserRole.CentralOffice,
+            cancellationToken);
     }
 }

@@ -9,4 +9,10 @@ public class LoginRequest
 
     [Required]
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional branch scope. When set, authenticates a user of that branch.
+    /// When omitted, authenticates the Central Office account only.
+    /// </summary>
+    public Guid? BranchId { get; set; }
 }
