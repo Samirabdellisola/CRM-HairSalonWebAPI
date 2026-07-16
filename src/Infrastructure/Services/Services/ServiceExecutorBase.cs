@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Services.DTOs;
+using SalonCRM.Domain.Entities;
 using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
@@ -29,9 +30,42 @@ public abstract class ServiceExecutorBase
         Price = service.Price,
         ImagePath = service.ImagePath,
         BranchId = service.BranchId,
+        ServiceCategoryId = service.ServiceCategoryId,
         CreatedAt = service.CreatedAt,
         UpdatedAt = service.UpdatedAt
     };
+
+    protected static ServiceCategoryResponse ToCategoryResponse(ServiceCategory category) => new()
+    {
+        Id = category.Id,
+        Name = category.Name,
+        BranchId = category.BranchId,
+        CreatedAt = category.CreatedAt,
+        UpdatedAt = category.UpdatedAt
+    };
+
+    protected async Task EnsureServiceCategoryValidForBranchAsync(
+        Guid? serviceCategoryId,
+        Guid branchId,
+        CancellationToken cancellationToken)
+    {
+        if (!serviceCategoryId.HasValue)
+        {
+            return;
+        }
+
+        var category = await DbContext.ServiceCategories.AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == serviceCategoryId.Value, cancellationToken);
+        if (category is null)
+        {
+            throw new AppException("Service category not found.", AppErrorType.NotFound);
+        }
+
+        if (category.BranchId != branchId)
+        {
+            throw new AppException("Service category must belong to the same branch as the service.", AppErrorType.Validation);
+        }
+    }
 
     protected async Task EnsureCanManageBranchAsync(
         Guid callerId,

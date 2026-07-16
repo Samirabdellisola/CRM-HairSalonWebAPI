@@ -12,4 +12,6 @@ public class UpdateServiceRequest
 
     [MaxLength(500)]
     public string? ImagePath { get; set; }
+
+    public Guid? ServiceCategoryId { get; set; }
 }

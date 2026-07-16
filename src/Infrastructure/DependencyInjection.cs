@@ -98,6 +98,11 @@ public static class DependencyInjection
         services.AddScoped<ICreateServiceExecutor, CreateServiceExecutor>();
         services.AddScoped<IUpdateServiceExecutor, UpdateServiceExecutor>();
         services.AddScoped<IDeleteServiceExecutor, DeleteServiceExecutor>();
+        services.AddScoped<IGetServiceCategoriesExecutor, GetServiceCategoriesExecutor>();
+        services.AddScoped<IGetServiceCategoryByIdExecutor, GetServiceCategoryByIdExecutor>();
+        services.AddScoped<ICreateServiceCategoryExecutor, CreateServiceCategoryExecutor>();
+        services.AddScoped<IUpdateServiceCategoryExecutor, UpdateServiceCategoryExecutor>();
+        services.AddScoped<IDeleteServiceCategoryExecutor, DeleteServiceCategoryExecutor>();
 
         services.AddScoped<IGetOrdersExecutor, GetOrdersExecutor>();
         services.AddScoped<IGetOrderByIdExecutor, GetOrderByIdExecutor>();

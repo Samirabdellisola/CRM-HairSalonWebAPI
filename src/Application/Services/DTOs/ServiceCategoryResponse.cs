@@ -1,18 +1,12 @@
 namespace SalonCRM.Application.Services.DTOs;
 
-public class ServiceResponse
+public class ServiceCategoryResponse
 {
     public Guid Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
 
-    public decimal Price { get; set; }
-
-    public string? ImagePath { get; set; }
-
     public Guid BranchId { get; set; }
-
-    public Guid? ServiceCategoryId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

@@ -19,4 +19,8 @@ public class Service : BaseEntity
     public Guid BranchId { get; set; }
 
     public Branch Branch { get; set; } = null!;
+
+    public Guid? ServiceCategoryId { get; set; }
+
+    public ServiceCategory? ServiceCategory { get; set; }
 }

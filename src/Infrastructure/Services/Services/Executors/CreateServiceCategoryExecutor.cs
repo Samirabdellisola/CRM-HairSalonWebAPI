@@ -2,24 +2,24 @@ using Microsoft.EntityFrameworkCore;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Services.DTOs;
 using SalonCRM.Application.Services.Executors;
+using SalonCRM.Domain.Entities;
 using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
-using ServiceEntity = SalonCRM.Domain.Entities.Service;
 
 namespace SalonCRM.Infrastructure.Services.Services.Executors;
 
-public class CreateServiceExecutor : ServiceExecutorBase, ICreateServiceExecutor
+public class CreateServiceCategoryExecutor : ServiceExecutorBase, ICreateServiceCategoryExecutor
 {
-    public CreateServiceExecutor(AppDbContext dbContext, IBranchScopeChecker branchScopeChecker)
+    public CreateServiceCategoryExecutor(AppDbContext dbContext, IBranchScopeChecker branchScopeChecker)
         : base(dbContext, branchScopeChecker)
     {
     }
 
-    public async Task<ServiceResponse> ExecuteAsync(
+    public async Task<ServiceCategoryResponse> ExecuteAsync(
         Guid callerId,
         UserRole callerRole,
-        CreateServiceRequest request,
+        CreateServiceCategoryRequest request,
         CancellationToken cancellationToken = default)
     {
         await EnsureCanManageBranchAsync(callerId, callerRole, request.BranchId, cancellationToken);
@@ -31,28 +31,23 @@ public class CreateServiceExecutor : ServiceExecutorBase, ICreateServiceExecutor
         }
 
         var name = request.Name.Trim();
-        var nameTaken = await DbContext.Services.AnyAsync(
-            s => s.BranchId == request.BranchId && s.Name == name,
+        var nameTaken = await DbContext.ServiceCategories.AnyAsync(
+            c => c.BranchId == request.BranchId && c.Name == name,
             cancellationToken);
         if (nameTaken)
         {
-            throw new AppException("A service with this name already exists for this branch.", AppErrorType.Conflict);
+            throw new AppException("A service category with this name already exists for this branch.", AppErrorType.Conflict);
         }
 
-        await EnsureServiceCategoryValidForBranchAsync(request.ServiceCategoryId, request.BranchId, cancellationToken);
-
-        var service = new ServiceEntity
+        var category = new ServiceCategory
         {
             Name = name,
-            Price = request.Price,
-            BranchId = request.BranchId,
-            ImagePath = string.IsNullOrWhiteSpace(request.ImagePath) ? null : request.ImagePath.Trim(),
-            ServiceCategoryId = request.ServiceCategoryId
+            BranchId = request.BranchId
         };
 
-        DbContext.Services.Add(service);
+        DbContext.ServiceCategories.Add(category);
         await DbContext.SaveChangesAsync(cancellationToken);
 
-        return ToResponse(service);
+        return ToCategoryResponse(category);
     }
 }

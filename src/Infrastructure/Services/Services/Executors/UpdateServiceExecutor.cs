@@ -39,9 +39,12 @@ public class UpdateServiceExecutor : ServiceExecutorBase, IUpdateServiceExecutor
             throw new AppException("A service with this name already exists for this branch.", AppErrorType.Conflict);
         }
 
+        await EnsureServiceCategoryValidForBranchAsync(request.ServiceCategoryId, service.BranchId, cancellationToken);
+
         service.Name = name;
         service.Price = request.Price;
         service.ImagePath = string.IsNullOrWhiteSpace(request.ImagePath) ? null : request.ImagePath.Trim();
+        service.ServiceCategoryId = request.ServiceCategoryId;
 
         await DbContext.SaveChangesAsync(cancellationToken);
 

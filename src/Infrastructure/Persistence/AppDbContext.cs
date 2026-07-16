@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Service> Services => Set<Service>();
+    public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Payment> Payments => Set<Payment>();
@@ -102,6 +103,19 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        modelBuilder.Entity<ServiceCategory>(entity =>
+        {
+            entity.ToTable("service_categories");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
+            entity.HasIndex(e => new { e.BranchId, e.Name }).IsUnique();
+            entity.HasOne(e => e.Branch)
+                .WithMany()
+                .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<Service>(entity =>
         {
             entity.ToTable("services");
@@ -110,10 +124,15 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Price).HasPrecision(18, 2);
             entity.Property(e => e.ImagePath).HasMaxLength(500);
             entity.HasIndex(e => new { e.BranchId, e.Name }).IsUnique();
+            entity.HasIndex(e => e.ServiceCategoryId);
             entity.HasOne(e => e.Branch)
                 .WithMany()
                 .HasForeignKey(e => e.BranchId)
                 .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.ServiceCategory)
+                .WithMany(c => c.Services)
+                .HasForeignKey(e => e.ServiceCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
