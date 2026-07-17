@@ -28,7 +28,7 @@ public class GetServiceCategoryByIdExecutor : ServiceExecutorBase, IGetServiceCa
             throw new AppException("Service category not found.", AppErrorType.NotFound);
         }
 
-        await EnsureCanManageBranchAsync(callerId, callerRole, category.BranchId, cancellationToken);
+        await EnsureCanViewServiceAsync(callerId, callerRole, category.BranchId, cancellationToken);
 
         return ToCategoryResponse(category);
     }

@@ -8,11 +8,12 @@ using SalonCRM.Application.Services.Executors;
 namespace SalonCRM.Api.Controllers;
 
 /// <summary>
-/// Service category management for CentralOffice and BranchAdmin (branch-scoped).
+/// Service category catalog CRUD. Writes are restricted to CentralOffice and the
+/// BranchAdmin of the category's branch (same access model as services).
 /// </summary>
 [Route("service-categories")]
 [Produces("application/json")]
-[Authorize(Roles = "CentralOffice,BranchAdmin")]
+[Authorize(Roles = "CentralOffice,BranchAdmin,Staff,Customer")]
 public class ServiceCategoriesController : ApiControllerBase
 {
     private readonly IGetServiceCategoriesExecutor _getServiceCategoriesExecutor;
@@ -35,7 +36,9 @@ public class ServiceCategoriesController : ApiControllerBase
         _deleteServiceCategoryExecutor = deleteServiceCategoryExecutor;
     }
 
-    /// <summary>Lists service categories. CentralOffice sees all; BranchAdmin sees only their branch.</summary>
+    /// <summary>
+    /// Lists service categories. CentralOffice sees all; BranchAdmin/Staff/Customer see only their branch.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<ServiceCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetServiceCategories(CancellationToken cancellationToken)
@@ -76,8 +79,9 @@ public class ServiceCategoriesController : ApiControllerBase
         }
     }
 
-    /// <summary>Creates a service category for a branch.</summary>
+    /// <summary>Creates a service category for a branch. CentralOffice or BranchAdmin of that branch.</summary>
     [HttpPost]
+    [Authorize(Roles = "CentralOffice,BranchAdmin")]
     [ProducesResponseType(typeof(ServiceCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
@@ -101,8 +105,9 @@ public class ServiceCategoriesController : ApiControllerBase
         }
     }
 
-    /// <summary>Updates a service category name.</summary>
+    /// <summary>Updates a service category. CentralOffice or BranchAdmin of that category's branch.</summary>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "CentralOffice,BranchAdmin")]
     [ProducesResponseType(typeof(ServiceCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
@@ -128,8 +133,9 @@ public class ServiceCategoriesController : ApiControllerBase
         }
     }
 
-    /// <summary>Deletes a service category that has no services.</summary>
+    /// <summary>Deletes a service category that has no services. CentralOffice or BranchAdmin of that branch.</summary>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "CentralOffice,BranchAdmin")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
