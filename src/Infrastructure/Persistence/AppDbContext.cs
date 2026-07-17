@@ -18,7 +18,6 @@ public class AppDbContext : DbContext
     public DbSet<Service> Services => Set<Service>();
     public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
     public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<Expense> Expenses => Set<Expense>();
@@ -141,11 +140,14 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("orders");
             entity.HasKey(e => e.Id);
+            entity.Property(e => e.ServiceName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.ServicePrice).HasPrecision(18, 2);
             entity.Property(e => e.TotalPrice).HasPrecision(18, 2);
             entity.Property(e => e.Comment).HasMaxLength(2000);
             entity.HasIndex(e => e.BranchId);
             entity.HasIndex(e => e.CustomerId);
             entity.HasIndex(e => e.StaffId);
+            entity.HasIndex(e => e.ServiceId);
             entity.HasIndex(e => e.PaymentId);
             entity.HasOne(e => e.Customer)
                 .WithMany()
@@ -155,36 +157,21 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.Staff)
                 .WithMany()
                 .HasForeignKey(e => e.StaffId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
             entity.HasOne(e => e.Branch)
                 .WithMany()
                 .HasForeignKey(e => e.BranchId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(e => e.Payment)
                 .WithMany()
                 .HasForeignKey(e => e.PaymentId)
                 .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        modelBuilder.Entity<OrderItem>(entity =>
-        {
-            entity.ToTable("order_items");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.ServiceName).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.ServicePrice).HasPrecision(18, 2);
-            entity.HasIndex(e => new { e.OrderId, e.ServiceId }).IsUnique();
-            entity.HasOne(e => e.Order)
-                .WithMany(o => o.Items)
-                .HasForeignKey(e => e.OrderId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(e => e.Service)
-                .WithMany()
-                .HasForeignKey(e => e.ServiceId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Payment>(entity =>

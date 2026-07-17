@@ -1,4 +1,3 @@
-using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Orders.DTOs;
 using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Domain.Enums;
@@ -7,9 +6,9 @@ using SalonCRM.Infrastructure.Services.Common;
 
 namespace SalonCRM.Infrastructure.Services.Orders.Executors;
 
-public class RemoveOrderServiceExecutor : OrderExecutorBase, IRemoveOrderServiceExecutor
+public class AddOrderStaffExecutor : OrderExecutorBase, IAddOrderStaffExecutor
 {
-    public RemoveOrderServiceExecutor(AppDbContext dbContext, IBranchScopeChecker branchScopeChecker)
+    public AddOrderStaffExecutor(AppDbContext dbContext, IBranchScopeChecker branchScopeChecker)
         : base(dbContext, branchScopeChecker)
     {
     }
@@ -18,23 +17,16 @@ public class RemoveOrderServiceExecutor : OrderExecutorBase, IRemoveOrderService
         Guid callerId,
         UserRole callerRole,
         Guid orderId,
-        RemoveOrderServiceRequest request,
+        AddOrderStaffRequest request,
         CancellationToken cancellationToken = default)
     {
-        var order = await GetOrderWithItemsOrThrowAsync(orderId, cancellationToken);
+        var order = await GetOrderOrThrowAsync(orderId, cancellationToken);
         EnsureOrderMutable(order);
         await EnsureCanManageBranchAsync(callerId, callerRole, order.BranchId, cancellationToken);
 
-        var item = order.Items.FirstOrDefault(i => i.ServiceId == request.ServiceId);
-        if (item is null)
-        {
-            throw new AppException("Service is not on this order.", AppErrorType.NotFound);
-        }
+        var staff = await ValidateStaffForBranchAsync(request.StaffId, order.BranchId, cancellationToken);
+        order.StaffId = staff.Id;
 
-        order.Items.Remove(item);
-        DbContext.OrderItems.Remove(item);
-
-        RecalculateTotal(order);
         await DbContext.SaveChangesAsync(cancellationToken);
 
         return ToResponse(order);

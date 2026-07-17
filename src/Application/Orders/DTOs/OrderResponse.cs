@@ -6,9 +6,15 @@ public class OrderResponse
 
     public Guid CustomerId { get; set; }
 
-    public Guid StaffId { get; set; }
+    public Guid? StaffId { get; set; }
 
     public Guid BranchId { get; set; }
+
+    public Guid ServiceId { get; set; }
+
+    public string ServiceName { get; set; } = string.Empty;
+
+    public decimal ServicePrice { get; set; }
 
     public decimal TotalPrice { get; set; }
 
@@ -21,8 +27,6 @@ public class OrderResponse
     public Guid? PaymentId { get; set; }
 
     public string? Comment { get; set; }
-
-    public IReadOnlyList<OrderItemResponse> Items { get; set; } = Array.Empty<OrderItemResponse>();
 
     public DateTime CreatedAt { get; set; }
 

@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Orders.DTOs;
 using SalonCRM.Application.Orders.Executors;
 using SalonCRM.Domain.Entities;
@@ -22,15 +20,18 @@ public class CreateOrderExecutor : OrderExecutorBase, ICreateOrderExecutor
         CreateOrderRequest request,
         CancellationToken cancellationToken = default)
     {
-        var (customer, staff) = await ValidateCustomerAndStaffAsync(request.CustomerId, request.StaffId, cancellationToken);
-        var branchId = staff.BranchId!.Value;
+        var customer = await ValidateCustomerAsync(request.CustomerId, cancellationToken);
+        var branchId = customer.BranchId!.Value;
 
         await EnsureCanManageBranchAsync(callerId, callerRole, branchId, cancellationToken);
+
+        var staff = await ValidateOptionalStaffForBranchAsync(request.StaffId, branchId, cancellationToken);
+        var service = await ValidateServiceForBranchAsync(request.ServiceId, branchId, cancellationToken);
 
         var order = new Order
         {
             CustomerId = customer.Id,
-            StaffId = staff.Id,
+            StaffId = staff?.Id,
             BranchId = branchId,
             Comment = string.IsNullOrWhiteSpace(request.Comment) ? null : request.Comment.Trim(),
             Date = request.Date?.ToUniversalTime() ?? DateTime.UtcNow,
@@ -38,30 +39,7 @@ public class CreateOrderExecutor : OrderExecutorBase, ICreateOrderExecutor
             Cancelled = false
         };
 
-        if (request.ServiceIds is { Count: > 0 })
-        {
-            var distinctServiceIds = request.ServiceIds.Distinct().ToList();
-            var services = await DbContext.Services
-                .Where(s => distinctServiceIds.Contains(s.Id) && s.BranchId == branchId)
-                .ToListAsync(cancellationToken);
-
-            if (services.Count != distinctServiceIds.Count)
-            {
-                throw new AppException("One or more services were not found for this branch.", AppErrorType.NotFound);
-            }
-
-            foreach (var service in services)
-            {
-                order.Items.Add(new OrderItem
-                {
-                    ServiceId = service.Id,
-                    ServiceName = service.Name,
-                    ServicePrice = service.Price
-                });
-            }
-        }
-
-        RecalculateTotal(order);
+        ApplyServiceSnapshot(order, service);
 
         DbContext.Orders.Add(order);
         await DbContext.SaveChangesAsync(cancellationToken);

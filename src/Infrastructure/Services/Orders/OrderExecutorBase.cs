@@ -9,7 +9,7 @@ using SalonCRM.Infrastructure.Services.Common;
 namespace SalonCRM.Infrastructure.Services.Orders;
 
 /// <summary>
-/// Shared helpers for order executors: mapping, scope checks, and total recalculation.
+/// Shared helpers for order executors: mapping, scope checks, and service validation.
 /// </summary>
 public abstract class OrderExecutorBase
 {
@@ -28,28 +28,26 @@ public abstract class OrderExecutorBase
         CustomerId = order.CustomerId,
         StaffId = order.StaffId,
         BranchId = order.BranchId,
+        ServiceId = order.ServiceId,
+        ServiceName = order.ServiceName,
+        ServicePrice = order.ServicePrice,
         TotalPrice = order.TotalPrice,
         Date = order.Date,
         Completed = order.Completed,
         Cancelled = order.Cancelled,
         PaymentId = order.PaymentId,
         Comment = order.Comment,
-        Items = order.Items
-            .OrderBy(i => i.ServiceName)
-            .Select(i => new OrderItemResponse
-            {
-                Id = i.Id,
-                ServiceId = i.ServiceId,
-                ServiceName = i.ServiceName,
-                ServicePrice = i.ServicePrice
-            })
-            .ToList(),
         CreatedAt = order.CreatedAt,
         UpdatedAt = order.UpdatedAt
     };
 
-    protected static void RecalculateTotal(Order order) =>
-        order.TotalPrice = order.Items.Sum(i => i.ServicePrice);
+    protected static void ApplyServiceSnapshot(Order order, Service service)
+    {
+        order.ServiceId = service.Id;
+        order.ServiceName = service.Name;
+        order.ServicePrice = service.Price;
+        order.TotalPrice = service.Price;
+    }
 
     protected static void EnsureOrderMutable(Order order)
     {
@@ -64,17 +62,31 @@ public abstract class OrderExecutorBase
         }
     }
 
-    protected async Task<Order> GetOrderWithItemsOrThrowAsync(Guid orderId, CancellationToken cancellationToken)
+    protected async Task<Order> GetOrderOrThrowAsync(Guid orderId, CancellationToken cancellationToken)
     {
-        var order = await DbContext.Orders
-            .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+        var order = await DbContext.Orders.FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
         if (order is null)
         {
             throw new AppException("Order not found.", AppErrorType.NotFound);
         }
 
         return order;
+    }
+
+    protected async Task<Service> ValidateServiceForBranchAsync(
+        Guid serviceId,
+        Guid branchId,
+        CancellationToken cancellationToken)
+    {
+        var service = await DbContext.Services.FirstOrDefaultAsync(
+            s => s.Id == serviceId && s.BranchId == branchId,
+            cancellationToken);
+        if (service is null)
+        {
+            throw new AppException("Service not found for this branch.", AppErrorType.NotFound);
+        }
+
+        return service;
     }
 
     protected async Task EnsureCanManageBranchAsync(
@@ -144,10 +156,7 @@ public abstract class OrderExecutorBase
         throw new AppException("You are not allowed to view this order.", AppErrorType.Forbidden);
     }
 
-    protected async Task<(User Customer, User Staff)> ValidateCustomerAndStaffAsync(
-        Guid customerId,
-        Guid staffId,
-        CancellationToken cancellationToken)
+    protected async Task<User> ValidateCustomerAsync(Guid customerId, CancellationToken cancellationToken)
     {
         var customer = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == customerId, cancellationToken);
         if (customer is null || customer.Role != UserRole.Customer)
@@ -155,20 +164,43 @@ public abstract class OrderExecutorBase
             throw new AppException("Customer not found.", AppErrorType.NotFound);
         }
 
+        if (!customer.BranchId.HasValue)
+        {
+            throw new AppException("Customer must be assigned to a branch.", AppErrorType.Validation);
+        }
+
+        return customer;
+    }
+
+    protected async Task<User> ValidateStaffForBranchAsync(
+        Guid staffId,
+        Guid branchId,
+        CancellationToken cancellationToken)
+    {
         var staff = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == staffId, cancellationToken);
         if (staff is null || staff.Role != UserRole.Staff)
         {
             throw new AppException("Staff not found.", AppErrorType.NotFound);
         }
 
-        if (!customer.BranchId.HasValue || !staff.BranchId.HasValue || customer.BranchId != staff.BranchId)
+        if (!staff.BranchId.HasValue || staff.BranchId != branchId)
         {
-            throw new AppException("Customer and Staff must belong to the same branch.", AppErrorType.Validation);
+            throw new AppException("Staff must belong to the order's branch.", AppErrorType.Validation);
         }
 
-        return (customer, staff);
+        return staff;
     }
 
-    protected IQueryable<Order> OrdersWithItems() =>
-        DbContext.Orders.Include(o => o.Items).AsQueryable();
+    protected async Task<User?> ValidateOptionalStaffForBranchAsync(
+        Guid? staffId,
+        Guid branchId,
+        CancellationToken cancellationToken)
+    {
+        if (!staffId.HasValue)
+        {
+            return null;
+        }
+
+        return await ValidateStaffForBranchAsync(staffId.Value, branchId, cancellationToken);
+    }
 }

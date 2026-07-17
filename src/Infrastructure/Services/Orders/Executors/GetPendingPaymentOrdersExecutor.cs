@@ -19,7 +19,7 @@ public class GetPendingPaymentOrdersExecutor : OrderExecutorBase, IGetPendingPay
         UserRole callerRole,
         CancellationToken cancellationToken = default)
     {
-        var query = OrdersWithItems().Where(o => o.PaymentId == null && !o.Cancelled);
+        var query = DbContext.Orders.Where(o => o.PaymentId == null && !o.Cancelled);
 
         if (callerRole == UserRole.BranchAdmin)
         {

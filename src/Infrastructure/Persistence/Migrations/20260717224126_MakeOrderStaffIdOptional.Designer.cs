@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SalonCRM.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using SalonCRM.Infrastructure.Persistence;
 namespace SalonCRM.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260717224126_MakeOrderStaffIdOptional")]
+    partial class MakeOrderStaffIdOptional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,18 +166,6 @@ namespace SalonCRM.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("PaymentId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ServiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ServiceName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<decimal>("ServicePrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
                     b.Property<Guid?>("StaffId")
                         .HasColumnType("uuid");
 
@@ -194,11 +185,46 @@ namespace SalonCRM.Infrastructure.Persistence.Migrations
                     b.HasIndex("PaymentId")
                         .IsUnique();
 
-                    b.HasIndex("ServiceId");
-
                     b.HasIndex("StaffId");
 
                     b.ToTable("orders", (string)null);
+                });
+
+            modelBuilder.Entity("SalonCRM.Domain.Entities.OrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("ServicePrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId");
+
+                    b.HasIndex("OrderId", "ServiceId")
+                        .IsUnique();
+
+                    b.ToTable("order_items", (string)null);
                 });
 
             modelBuilder.Entity("SalonCRM.Domain.Entities.PasswordResetToken", b =>
@@ -536,12 +562,6 @@ namespace SalonCRM.Infrastructure.Persistence.Migrations
                         .HasForeignKey("PaymentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("SalonCRM.Domain.Entities.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("SalonCRM.Domain.Entities.User", "Staff")
                         .WithMany()
                         .HasForeignKey("StaffId")
@@ -553,9 +573,26 @@ namespace SalonCRM.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Payment");
 
-                    b.Navigation("Service");
-
                     b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("SalonCRM.Domain.Entities.OrderItem", b =>
+                {
+                    b.HasOne("SalonCRM.Domain.Entities.Order", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SalonCRM.Domain.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("SalonCRM.Domain.Entities.PasswordResetToken", b =>
@@ -668,6 +705,11 @@ namespace SalonCRM.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("SalonCRM.Domain.Entities.ExpenseCategory", b =>
                 {
                     b.Navigation("Expenses");
+                });
+
+            modelBuilder.Entity("SalonCRM.Domain.Entities.Order", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("SalonCRM.Domain.Entities.ServiceCategory", b =>

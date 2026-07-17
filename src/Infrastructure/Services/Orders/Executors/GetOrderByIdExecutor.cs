@@ -19,7 +19,7 @@ public class GetOrderByIdExecutor : OrderExecutorBase, IGetOrderByIdExecutor
         Guid orderId,
         CancellationToken cancellationToken = default)
     {
-        var order = await GetOrderWithItemsOrThrowAsync(orderId, cancellationToken);
+        var order = await GetOrderOrThrowAsync(orderId, cancellationToken);
         await EnsureCanViewOrderAsync(callerId, callerRole, order, cancellationToken);
         return ToResponse(order);
     }

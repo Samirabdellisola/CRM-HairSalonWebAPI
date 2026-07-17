@@ -3,7 +3,7 @@ using SalonCRM.Domain.Common;
 namespace SalonCRM.Domain.Entities;
 
 /// <summary>
-/// A salon order linking a customer, a staff member, and one or more services.
+/// A salon order linking a customer, optional staff member, and a single service.
 /// </summary>
 public class Order : BaseEntity
 {
@@ -11,17 +11,37 @@ public class Order : BaseEntity
 
     public User Customer { get; set; } = null!;
 
-    public Guid StaffId { get; set; }
+    /// <summary>
+    /// Optional staff assigned to the order. May be set at creation or via add-staff.
+    /// </summary>
+    public Guid? StaffId { get; set; }
 
-    public User Staff { get; set; } = null!;
+    public User? Staff { get; set; }
 
     /// <summary>
-    /// Denormalized from the staff member's branch at creation time.
+    /// Denormalized from the customer's branch at creation time.
     /// </summary>
     public Guid BranchId { get; set; }
 
     public Branch Branch { get; set; } = null!;
 
+    public Guid ServiceId { get; set; }
+
+    public Service Service { get; set; } = null!;
+
+    /// <summary>
+    /// Service name snapshotted at order creation/update time.
+    /// </summary>
+    public string ServiceName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Service price snapshotted at order creation/update time.
+    /// </summary>
+    public decimal ServicePrice { get; set; }
+
+    /// <summary>
+    /// Kept in sync with ServicePrice for reporting/payment compatibility.
+    /// </summary>
     public decimal TotalPrice { get; set; }
 
     /// <summary>
@@ -41,6 +61,4 @@ public class Order : BaseEntity
     public Payment? Payment { get; set; }
 
     public string? Comment { get; set; }
-
-    public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 }

@@ -38,6 +38,11 @@ public class CreatePaymentExecutor : PaymentExecutorBase, ICreatePaymentExecutor
             throw new AppException("This order already has a payment.", AppErrorType.Conflict);
         }
 
+        if (!order.StaffId.HasValue)
+        {
+            throw new AppException("Order must have a staff member before creating a payment.", AppErrorType.Validation);
+        }
+
         await EnsureCanManageBranchAsync(callerId, callerRole, order.BranchId, cancellationToken);
 
         var paymentMethod = request.PaymentMethod.Trim();
@@ -50,7 +55,7 @@ public class CreatePaymentExecutor : PaymentExecutorBase, ICreatePaymentExecutor
         {
             PaymentMethod = paymentMethod,
             CustomerId = order.CustomerId,
-            StaffId = order.StaffId,
+            StaffId = order.StaffId.Value,
             BranchId = order.BranchId,
             OrderId = order.Id,
             Date = request.Date?.ToUniversalTime() ?? DateTime.UtcNow

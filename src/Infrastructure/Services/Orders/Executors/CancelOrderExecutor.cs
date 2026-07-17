@@ -20,7 +20,7 @@ public class CancelOrderExecutor : OrderExecutorBase, ICancelOrderExecutor
         Guid orderId,
         CancellationToken cancellationToken = default)
     {
-        var order = await GetOrderWithItemsOrThrowAsync(orderId, cancellationToken);
+        var order = await GetOrderOrThrowAsync(orderId, cancellationToken);
         await EnsureCanManageBranchAsync(callerId, callerRole, order.BranchId, cancellationToken);
 
         if (order.Completed)

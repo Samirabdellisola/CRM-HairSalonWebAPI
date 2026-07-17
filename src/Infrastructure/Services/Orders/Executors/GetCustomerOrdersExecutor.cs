@@ -49,7 +49,7 @@ public class GetCustomerOrdersExecutor : OrderExecutorBase, IGetCustomerOrdersEx
             throw new AppException("You are not allowed to list customer orders.", AppErrorType.Forbidden);
         }
 
-        var orders = await OrdersWithItems()
+        var orders = await DbContext.Orders
             .Where(o => o.CustomerId == customerId)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);

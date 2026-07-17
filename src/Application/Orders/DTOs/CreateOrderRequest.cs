@@ -7,8 +7,13 @@ public class CreateOrderRequest
     [Required]
     public Guid CustomerId { get; set; }
 
+    /// <summary>
+    /// Optional staff for the order. May also be assigned later via add-staff.
+    /// </summary>
+    public Guid? StaffId { get; set; }
+
     [Required]
-    public Guid StaffId { get; set; }
+    public Guid ServiceId { get; set; }
 
     [MaxLength(2000)]
     public string? Comment { get; set; }
@@ -17,6 +22,4 @@ public class CreateOrderRequest
     /// Business date of the order. Defaults to UTC now when omitted.
     /// </summary>
     public DateTime? Date { get; set; }
-
-    public List<Guid>? ServiceIds { get; set; }
 }

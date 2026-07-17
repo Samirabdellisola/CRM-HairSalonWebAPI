@@ -49,7 +49,7 @@ public class GetStaffOrdersExecutor : OrderExecutorBase, IGetStaffOrdersExecutor
             throw new AppException("You are not allowed to list staff orders.", AppErrorType.Forbidden);
         }
 
-        var orders = await OrdersWithItems()
+        var orders = await DbContext.Orders
             .Where(o => o.StaffId == staffId)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SalonCRM.Application.Orders.DTOs;
 using SalonCRM.Application.Orders.Executors;
+using SalonCRM.Domain.Entities;
 using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
@@ -19,7 +20,7 @@ public class GetOrdersExecutor : OrderExecutorBase, IGetOrdersExecutor
         UserRole callerRole,
         CancellationToken cancellationToken = default)
     {
-        var query = OrdersWithItems();
+        IQueryable<Order> query = DbContext.Orders;
 
         if (callerRole == UserRole.BranchAdmin)
         {

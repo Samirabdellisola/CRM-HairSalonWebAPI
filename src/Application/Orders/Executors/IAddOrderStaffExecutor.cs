@@ -3,12 +3,12 @@ using SalonCRM.Domain.Enums;
 
 namespace SalonCRM.Application.Orders.Executors;
 
-public interface IRemoveOrderServiceExecutor
+public interface IAddOrderStaffExecutor
 {
     Task<OrderResponse> ExecuteAsync(
         Guid callerId,
         UserRole callerRole,
         Guid orderId,
-        RemoveOrderServiceRequest request,
+        AddOrderStaffRequest request,
         CancellationToken cancellationToken = default);
 }

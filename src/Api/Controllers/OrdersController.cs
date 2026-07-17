@@ -10,8 +10,8 @@ using SalonCRM.Application.Payments.Executors;
 namespace SalonCRM.Api.Controllers;
 
 /// <summary>
-/// Order management: list/get/create/update, add/remove services, complete/cancel,
-/// and pending-payment listings.
+/// Order management: list/get/create/update, add staff, complete/cancel,
+/// and pending-payment listings. Each order has a single service.
 /// </summary>
 [Route("orders")]
 [Produces("application/json")]
@@ -22,8 +22,7 @@ public class OrdersController : ApiControllerBase
     private readonly IGetOrderByIdExecutor _getOrderByIdExecutor;
     private readonly ICreateOrderExecutor _createOrderExecutor;
     private readonly IUpdateOrderExecutor _updateOrderExecutor;
-    private readonly IAddOrderServiceExecutor _addOrderServiceExecutor;
-    private readonly IRemoveOrderServiceExecutor _removeOrderServiceExecutor;
+    private readonly IAddOrderStaffExecutor _addOrderStaffExecutor;
     private readonly ICompleteOrderExecutor _completeOrderExecutor;
     private readonly ICancelOrderExecutor _cancelOrderExecutor;
     private readonly IGetPendingPaymentOrdersExecutor _getPendingPaymentOrdersExecutor;
@@ -34,8 +33,7 @@ public class OrdersController : ApiControllerBase
         IGetOrderByIdExecutor getOrderByIdExecutor,
         ICreateOrderExecutor createOrderExecutor,
         IUpdateOrderExecutor updateOrderExecutor,
-        IAddOrderServiceExecutor addOrderServiceExecutor,
-        IRemoveOrderServiceExecutor removeOrderServiceExecutor,
+        IAddOrderStaffExecutor addOrderStaffExecutor,
         ICompleteOrderExecutor completeOrderExecutor,
         ICancelOrderExecutor cancelOrderExecutor,
         IGetPendingPaymentOrdersExecutor getPendingPaymentOrdersExecutor,
@@ -45,8 +43,7 @@ public class OrdersController : ApiControllerBase
         _getOrderByIdExecutor = getOrderByIdExecutor;
         _createOrderExecutor = createOrderExecutor;
         _updateOrderExecutor = updateOrderExecutor;
-        _addOrderServiceExecutor = addOrderServiceExecutor;
-        _removeOrderServiceExecutor = removeOrderServiceExecutor;
+        _addOrderStaffExecutor = addOrderStaffExecutor;
         _completeOrderExecutor = completeOrderExecutor;
         _cancelOrderExecutor = cancelOrderExecutor;
         _getPendingPaymentOrdersExecutor = getPendingPaymentOrdersExecutor;
@@ -125,7 +122,7 @@ public class OrdersController : ApiControllerBase
         }
     }
 
-    /// <summary>Creates an order. Staff, BranchAdmin, or CentralOffice.</summary>
+    /// <summary>Creates an order with a single service. Staff, BranchAdmin, or CentralOffice.</summary>
     [HttpPost]
     [Authorize(Roles = "CentralOffice,BranchAdmin,Staff")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
@@ -145,7 +142,7 @@ public class OrdersController : ApiControllerBase
         }
     }
 
-    /// <summary>Updates CustomerId, StaffId, and Comment on an open order.</summary>
+    /// <summary>Updates CustomerId, ServiceId, optional StaffId, and Comment on an open order.</summary>
     [HttpPut("{id:guid}")]
     [Authorize(Roles = "CentralOffice,BranchAdmin,Staff")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
@@ -164,37 +161,17 @@ public class OrdersController : ApiControllerBase
         }
     }
 
-    /// <summary>Adds a service line to an order.</summary>
-    [HttpPatch("{id:guid}/add-service")]
+    /// <summary>Assigns a staff member to an open order.</summary>
+    [HttpPatch("{id:guid}/add-staff")]
     [Authorize(Roles = "CentralOffice,BranchAdmin,Staff")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> AddOrderService(Guid id, [FromBody] AddOrderServiceRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddOrderStaff(Guid id, [FromBody] AddOrderStaffRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _addOrderServiceExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, request, cancellationToken);
-            return Ok(response);
-        }
-        catch (AppException ex)
-        {
-            return HandleAppException(ex);
-        }
-    }
-
-    /// <summary>Removes a service line from an order.</summary>
-    [HttpPatch("{id:guid}/remove-service")]
-    [Authorize(Roles = "CentralOffice,BranchAdmin,Staff")]
-    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RemoveOrderService(Guid id, [FromBody] RemoveOrderServiceRequest request, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var response = await _removeOrderServiceExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, request, cancellationToken);
+            var response = await _addOrderStaffExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, request, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

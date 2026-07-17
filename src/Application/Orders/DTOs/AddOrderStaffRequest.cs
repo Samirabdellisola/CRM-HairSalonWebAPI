@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SalonCRM.Application.Orders.DTOs;
 
-public class AddOrderServiceRequest
+public class AddOrderStaffRequest
 {
     [Required]
-    public Guid ServiceId { get; set; }
+    public Guid StaffId { get; set; }
 }

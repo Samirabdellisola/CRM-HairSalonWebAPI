@@ -21,19 +21,23 @@ public class UpdateOrderExecutor : OrderExecutorBase, IUpdateOrderExecutor
         UpdateOrderRequest request,
         CancellationToken cancellationToken = default)
     {
-        var order = await GetOrderWithItemsOrThrowAsync(orderId, cancellationToken);
+        var order = await GetOrderOrThrowAsync(orderId, cancellationToken);
         EnsureOrderMutable(order);
         await EnsureCanManageBranchAsync(callerId, callerRole, order.BranchId, cancellationToken);
 
-        var (customer, staff) = await ValidateCustomerAndStaffAsync(request.CustomerId, request.StaffId, cancellationToken);
-        if (staff.BranchId != order.BranchId || customer.BranchId != order.BranchId)
+        var customer = await ValidateCustomerAsync(request.CustomerId, cancellationToken);
+        if (customer.BranchId != order.BranchId)
         {
-            throw new AppException("Customer and Staff must belong to the order's branch.", AppErrorType.Validation);
+            throw new AppException("Customer must belong to the order's branch.", AppErrorType.Validation);
         }
 
+        var staff = await ValidateOptionalStaffForBranchAsync(request.StaffId, order.BranchId, cancellationToken);
+        var service = await ValidateServiceForBranchAsync(request.ServiceId, order.BranchId, cancellationToken);
+
         order.CustomerId = customer.Id;
-        order.StaffId = staff.Id;
+        order.StaffId = staff?.Id;
         order.Comment = string.IsNullOrWhiteSpace(request.Comment) ? null : request.Comment.Trim();
+        ApplyServiceSnapshot(order, service);
 
         await DbContext.SaveChangesAsync(cancellationToken);
 

@@ -34,7 +34,7 @@ public class GetBranchPendingPaymentOrdersExecutor : OrderExecutorBase, IGetBran
 
         await EnsureCanManageBranchAsync(callerId, callerRole, branchId, cancellationToken);
 
-        var orders = await OrdersWithItems()
+        var orders = await DbContext.Orders
             .Where(o => o.BranchId == branchId && o.PaymentId == null && !o.Cancelled)
             .OrderByDescending(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
