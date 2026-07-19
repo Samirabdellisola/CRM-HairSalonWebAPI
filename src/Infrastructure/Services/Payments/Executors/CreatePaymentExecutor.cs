@@ -45,15 +45,14 @@ public class CreatePaymentExecutor : PaymentExecutorBase, ICreatePaymentExecutor
 
         await EnsureCanManageBranchAsync(callerId, callerRole, order.BranchId, cancellationToken);
 
-        var paymentMethod = request.PaymentMethod.Trim();
-        if (string.IsNullOrWhiteSpace(paymentMethod))
+        if (!Enum.IsDefined(request.PaymentMethod))
         {
-            throw new AppException("PaymentMethod is required.", AppErrorType.Validation);
+            throw new AppException("Invalid payment method.", AppErrorType.Validation);
         }
 
         var payment = new Payment
         {
-            PaymentMethod = paymentMethod,
+            PaymentMethod = request.PaymentMethod,
             CustomerId = order.CustomerId,
             StaffId = order.StaffId.Value,
             BranchId = order.BranchId,

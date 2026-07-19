@@ -1,4 +1,5 @@
 using SalonCRM.Domain.Common;
+using SalonCRM.Domain.Enums;
 
 namespace SalonCRM.Domain.Entities;
 
@@ -7,7 +8,7 @@ namespace SalonCRM.Domain.Entities;
 /// </summary>
 public class Payment : BaseEntity
 {
-    public string PaymentMethod { get; set; } = string.Empty;
+    public PaymentMethod PaymentMethod { get; set; }
 
     public Guid CustomerId { get; set; }
 

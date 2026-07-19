@@ -1,10 +1,12 @@
+using SalonCRM.Domain.Enums;
+
 namespace SalonCRM.Application.Reports.DTOs;
 
 public class PaymentReportItem
 {
     public Guid Id { get; set; }
 
-    public string PaymentMethod { get; set; } = string.Empty;
+    public PaymentMethod PaymentMethod { get; set; }
 
     public Guid CustomerId { get; set; }
 

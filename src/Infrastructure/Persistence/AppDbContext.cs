@@ -178,7 +178,9 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("payments");
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.PaymentMethod).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.PaymentMethod)
+                .HasConversion<int>()
+                .IsRequired();
             entity.HasIndex(e => e.BranchId);
             entity.HasIndex(e => e.CustomerId);
             entity.HasIndex(e => e.StaffId);
