@@ -3,7 +3,7 @@ using SalonCRM.Domain.Common;
 namespace SalonCRM.Domain.Entities;
 
 /// <summary>
-/// Expense category scoped to a branch. Managed by CentralOffice only.
+/// Expense category scoped to a branch. Managed by CentralOffice or BranchAdmin.
 /// </summary>
 public class ExpenseCategory : BaseEntity
 {

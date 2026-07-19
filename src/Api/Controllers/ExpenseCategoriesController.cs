@@ -8,11 +8,11 @@ using SalonCRM.Application.Expenses.Executors;
 namespace SalonCRM.Api.Controllers;
 
 /// <summary>
-/// Expense category management. CentralOffice only.
+/// Expense category management for CentralOffice and BranchAdmin (branch-scoped).
 /// </summary>
 [Route("expense-categories")]
 [Produces("application/json")]
-[Authorize(Roles = "CentralOffice")]
+[Authorize(Roles = "CentralOffice,BranchAdmin")]
 public class ExpenseCategoriesController : ApiControllerBase
 {
     private readonly IGetExpenseCategoriesExecutor _getExpenseCategoriesExecutor;
@@ -35,14 +35,17 @@ public class ExpenseCategoriesController : ApiControllerBase
         _deleteExpenseCategoryExecutor = deleteExpenseCategoryExecutor;
     }
 
-    /// <summary>Lists all expense categories.</summary>
+    /// <summary>Lists expense categories. CentralOffice sees all; BranchAdmin sees only their branch.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<ExpenseCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetExpenseCategories(CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _getExpenseCategoriesExecutor.ExecuteAsync(cancellationToken);
+            var response = await _getExpenseCategoriesExecutor.ExecuteAsync(
+                GetCurrentUserId(),
+                GetCurrentUserRole(),
+                cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)
@@ -54,12 +57,17 @@ public class ExpenseCategoriesController : ApiControllerBase
     /// <summary>Returns an expense category by id.</summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ExpenseCategoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetExpenseCategoryById(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _getExpenseCategoryByIdExecutor.ExecuteAsync(id, cancellationToken);
+            var response = await _getExpenseCategoryByIdExecutor.ExecuteAsync(
+                GetCurrentUserId(),
+                GetCurrentUserRole(),
+                id,
+                cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)
@@ -68,9 +76,10 @@ public class ExpenseCategoriesController : ApiControllerBase
         }
     }
 
-    /// <summary>Creates an expense category for a branch.</summary>
+    /// <summary>Creates an expense category for a branch. BranchAdmin may only create for their own branch.</summary>
     [HttpPost]
     [ProducesResponseType(typeof(ExpenseCategoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateExpenseCategory(
@@ -79,7 +88,11 @@ public class ExpenseCategoriesController : ApiControllerBase
     {
         try
         {
-            var response = await _createExpenseCategoryExecutor.ExecuteAsync(request, cancellationToken);
+            var response = await _createExpenseCategoryExecutor.ExecuteAsync(
+                GetCurrentUserId(),
+                GetCurrentUserRole(),
+                request,
+                cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)
@@ -91,6 +104,7 @@ public class ExpenseCategoriesController : ApiControllerBase
     /// <summary>Updates an expense category name.</summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(ExpenseCategoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdateExpenseCategory(
@@ -100,7 +114,12 @@ public class ExpenseCategoriesController : ApiControllerBase
     {
         try
         {
-            var response = await _updateExpenseCategoryExecutor.ExecuteAsync(id, request, cancellationToken);
+            var response = await _updateExpenseCategoryExecutor.ExecuteAsync(
+                GetCurrentUserId(),
+                GetCurrentUserRole(),
+                id,
+                request,
+                cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)
@@ -112,13 +131,18 @@ public class ExpenseCategoriesController : ApiControllerBase
     /// <summary>Deletes an expense category that has no expenses.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> DeleteExpenseCategory(Guid id, CancellationToken cancellationToken)
     {
         try
         {
-            var response = await _deleteExpenseCategoryExecutor.ExecuteAsync(id, cancellationToken);
+            var response = await _deleteExpenseCategoryExecutor.ExecuteAsync(
+                GetCurrentUserId(),
+                GetCurrentUserRole(),
+                id,
+                cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

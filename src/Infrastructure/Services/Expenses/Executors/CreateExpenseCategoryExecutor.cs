@@ -3,6 +3,7 @@ using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Expenses.DTOs;
 using SalonCRM.Application.Expenses.Executors;
 using SalonCRM.Domain.Entities;
+using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
 
@@ -16,9 +17,13 @@ public class CreateExpenseCategoryExecutor : ExpenseExecutorBase, ICreateExpense
     }
 
     public async Task<ExpenseCategoryResponse> ExecuteAsync(
+        Guid callerId,
+        UserRole callerRole,
         CreateExpenseCategoryRequest request,
         CancellationToken cancellationToken = default)
     {
+        await EnsureCanAccessBranchAsync(callerId, callerRole, request.BranchId, cancellationToken);
+
         var branchExists = await DbContext.Branches.AnyAsync(b => b.Id == request.BranchId, cancellationToken);
         if (!branchExists)
         {

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SalonCRM.Application.Common.Exceptions;
 using SalonCRM.Application.Expenses.DTOs;
 using SalonCRM.Application.Expenses.Executors;
+using SalonCRM.Domain.Enums;
 using SalonCRM.Infrastructure.Persistence;
 using SalonCRM.Infrastructure.Services.Common;
 
@@ -15,6 +16,8 @@ public class UpdateExpenseCategoryExecutor : ExpenseExecutorBase, IUpdateExpense
     }
 
     public async Task<ExpenseCategoryResponse> ExecuteAsync(
+        Guid callerId,
+        UserRole callerRole,
         Guid categoryId,
         UpdateExpenseCategoryRequest request,
         CancellationToken cancellationToken = default)
@@ -24,6 +27,8 @@ public class UpdateExpenseCategoryExecutor : ExpenseExecutorBase, IUpdateExpense
         {
             throw new AppException("Expense category not found.", AppErrorType.NotFound);
         }
+
+        await EnsureCanAccessBranchAsync(callerId, callerRole, category.BranchId, cancellationToken);
 
         var name = request.Name.Trim();
         var nameTaken = await DbContext.ExpenseCategories.AnyAsync(
