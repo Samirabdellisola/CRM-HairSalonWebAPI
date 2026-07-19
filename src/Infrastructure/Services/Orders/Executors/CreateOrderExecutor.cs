@@ -25,6 +25,11 @@ public class CreateOrderExecutor : OrderExecutorBase, ICreateOrderExecutor
 
         await EnsureCanManageBranchAsync(callerId, callerRole, branchId, cancellationToken);
 
+        if (request.StaffId.HasValue)
+        {
+            EnsureCanTargetOrderStaff(callerId, callerRole, request.StaffId.Value);
+        }
+
         var staff = await ValidateOptionalStaffForBranchAsync(request.StaffId, branchId, cancellationToken);
         var service = await ValidateServiceForBranchAsync(request.ServiceId, branchId, cancellationToken);
 

@@ -23,6 +23,7 @@ public class OrdersController : ApiControllerBase
     private readonly ICreateOrderExecutor _createOrderExecutor;
     private readonly IUpdateOrderExecutor _updateOrderExecutor;
     private readonly IAddOrderStaffExecutor _addOrderStaffExecutor;
+    private readonly IRemoveOrderStaffExecutor _removeOrderStaffExecutor;
     private readonly ICompleteOrderExecutor _completeOrderExecutor;
     private readonly ICancelOrderExecutor _cancelOrderExecutor;
     private readonly IGetPendingPaymentOrdersExecutor _getPendingPaymentOrdersExecutor;
@@ -34,6 +35,7 @@ public class OrdersController : ApiControllerBase
         ICreateOrderExecutor createOrderExecutor,
         IUpdateOrderExecutor updateOrderExecutor,
         IAddOrderStaffExecutor addOrderStaffExecutor,
+        IRemoveOrderStaffExecutor removeOrderStaffExecutor,
         ICompleteOrderExecutor completeOrderExecutor,
         ICancelOrderExecutor cancelOrderExecutor,
         IGetPendingPaymentOrdersExecutor getPendingPaymentOrdersExecutor,
@@ -44,6 +46,7 @@ public class OrdersController : ApiControllerBase
         _createOrderExecutor = createOrderExecutor;
         _updateOrderExecutor = updateOrderExecutor;
         _addOrderStaffExecutor = addOrderStaffExecutor;
+        _removeOrderStaffExecutor = removeOrderStaffExecutor;
         _completeOrderExecutor = completeOrderExecutor;
         _cancelOrderExecutor = cancelOrderExecutor;
         _getPendingPaymentOrdersExecutor = getPendingPaymentOrdersExecutor;
@@ -161,7 +164,10 @@ public class OrdersController : ApiControllerBase
         }
     }
 
-    /// <summary>Assigns a staff member to an open order.</summary>
+    /// <summary>
+    /// Assigns a staff member to an open order.
+    /// Staff callers may only assign themselves; CentralOffice/BranchAdmin may assign any branch staff.
+    /// </summary>
     [HttpPatch("{id:guid}/add-staff")]
     [Authorize(Roles = "CentralOffice,BranchAdmin,Staff")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
@@ -172,6 +178,28 @@ public class OrdersController : ApiControllerBase
         try
         {
             var response = await _addOrderStaffExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, request, cancellationToken);
+            return Ok(response);
+        }
+        catch (AppException ex)
+        {
+            return HandleAppException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Removes a staff member from an open order.
+    /// Staff callers may only remove themselves; CentralOffice/BranchAdmin may remove any assigned staff.
+    /// </summary>
+    [HttpPatch("{id:guid}/remove-staff")]
+    [Authorize(Roles = "CentralOffice,BranchAdmin,Staff")]
+    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveOrderStaff(Guid id, [FromBody] RemoveOrderStaffRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await _removeOrderStaffExecutor.ExecuteAsync(GetCurrentUserId(), GetCurrentUserRole(), id, request, cancellationToken);
             return Ok(response);
         }
         catch (AppException ex)

@@ -112,6 +112,7 @@ public static class DependencyInjection
         services.AddScoped<ICreateOrderExecutor, CreateOrderExecutor>();
         services.AddScoped<IUpdateOrderExecutor, UpdateOrderExecutor>();
         services.AddScoped<IAddOrderStaffExecutor, AddOrderStaffExecutor>();
+        services.AddScoped<IRemoveOrderStaffExecutor, RemoveOrderStaffExecutor>();
         services.AddScoped<ICompleteOrderExecutor, CompleteOrderExecutor>();
         services.AddScoped<ICancelOrderExecutor, CancelOrderExecutor>();
         services.AddScoped<IGetPendingPaymentOrdersExecutor, GetPendingPaymentOrdersExecutor>();

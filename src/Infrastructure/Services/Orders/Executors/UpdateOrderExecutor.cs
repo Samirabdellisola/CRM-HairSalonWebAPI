@@ -31,6 +31,15 @@ public class UpdateOrderExecutor : OrderExecutorBase, IUpdateOrderExecutor
             throw new AppException("Customer must belong to the order's branch.", AppErrorType.Validation);
         }
 
+        if (request.StaffId.HasValue)
+        {
+            EnsureCanTargetOrderStaff(callerId, callerRole, request.StaffId.Value);
+        }
+        else if (callerRole == UserRole.Staff && order.StaffId.HasValue && order.StaffId.Value != callerId)
+        {
+            throw new AppException("Staff can only add or remove themselves on an order.", AppErrorType.Forbidden);
+        }
+
         var staff = await ValidateOptionalStaffForBranchAsync(request.StaffId, order.BranchId, cancellationToken);
         var service = await ValidateServiceForBranchAsync(request.ServiceId, order.BranchId, cancellationToken);
 

@@ -62,6 +62,17 @@ public abstract class OrderExecutorBase
         }
     }
 
+    /// <summary>
+    /// Staff may only add/remove themselves. CentralOffice and BranchAdmin may target any staff.
+    /// </summary>
+    protected static void EnsureCanTargetOrderStaff(Guid callerId, UserRole callerRole, Guid targetStaffId)
+    {
+        if (callerRole == UserRole.Staff && callerId != targetStaffId)
+        {
+            throw new AppException("Staff can only add or remove themselves on an order.", AppErrorType.Forbidden);
+        }
+    }
+
     protected async Task<Order> GetOrderOrThrowAsync(Guid orderId, CancellationToken cancellationToken)
     {
         var order = await DbContext.Orders.FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
